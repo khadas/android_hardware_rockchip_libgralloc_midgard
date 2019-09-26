@@ -21,6 +21,8 @@
 
 # Android.mk for drm_gralloc
 
+ifneq (,$(filter mali-t860 mali-t760, $(TARGET_BOARD_PLATFORM_GPU)))
+
 DRM_GPU_DRIVERS := $(strip $(filter-out swrast, $(BOARD_GPU_DRIVERS)))
 DRM_GPU_DRIVERS := rockchip
 intel_drivers := i915 i965 i915g ilo
@@ -81,25 +83,31 @@ else
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libgralloc_drm
-ifeq (1,$(strip $(shell expr $(PLATFORM_VERSION) \>= 8.0)))
 LOCAL_PROPRIETARY_MODULE := true
-endif
 LOCAL_MODULE_TAGS := optional
-
-LOCAL_SRC_FILES := \
-	gralloc_drm.cpp
 
 LOCAL_C_INCLUDES := \
 	external/libdrm \
 	external/libdrm/include/drm \
-	hardware/libhardware/include \
-	system/core/liblog/include
+	system/core/liblog/include \
+
+LOCAL_HEADER_LIBRARIES += \
+	libhardware_headers \
+	liblog_headers \
+	libutils_headers \
+	libcutils_headers
+
+LOCAL_CPPFLAGS := -Wunused-variable
+LOCAL_SRC_FILES := \
+	gralloc_drm.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libdrm \
 	liblog \
 	libcutils \
-	libutils
+	libutils \
+
+	# libhardware_legacy \
 
 ifneq ($(filter $(intel_drivers), $(DRM_GPU_DRIVERS)),)
 LOCAL_SRC_FILES += gralloc_drm_intel.c
@@ -175,7 +183,9 @@ MALI_AFBC_GRALLOC := 0
 AFBC_FILES =
 endif
 
-LOCAL_C_INCLUDES += hardware/rockchip/librkvpu
+LOCAL_C_INCLUDES += \
+	hardware/rockchip/librkvpu \
+
 LOCAL_SRC_FILES += gralloc_drm_rockchip.cpp \
 	mali_gralloc_formats.cpp \
 	$(AFBC_FILES)
@@ -247,12 +257,19 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	gralloc.cpp
 
-
+LOCAL_CPPFLAGS := -Wunused-variable
 LOCAL_C_INCLUDES := \
 	external/libdrm \
 	external/libdrm/include/drm \
 	hardware/libhardware/include \
+	external/libdrm/include/drm \
 	system/core/liblog/include
+
+LOCAL_HEADER_LIBRARIES += \
+	libutils_headers \
+	liblog_headers \
+	libhardware_headers \
+	libcutils_headers
 
 LOCAL_SHARED_LIBRARIES := \
 	libgralloc_drm \
@@ -269,12 +286,12 @@ ifeq ($(TARGET_USES_HWC2),true)
 endif
 
 LOCAL_MODULE := gralloc.$(TARGET_BOARD_HARDWARE)
-ifeq (1,$(strip $(shell expr $(PLATFORM_VERSION) \>= 8.0)))
 LOCAL_PROPRIETARY_MODULE := true
-endif
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_RELATIVE_PATH := hw
 include $(BUILD_SHARED_LIBRARY)
 
 endif # DRM_GPU_DRIVERS=prebuilt
 endif # DRM_GPU_DRIVERS
+
+endif
