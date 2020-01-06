@@ -1741,7 +1741,7 @@ struct gralloc_drm_bo_t *drm_gem_rockchip_alloc(
 #define MAGIC_USAGE_FOR_AFBC_LAYER     (0x88)
         /* if current buffer is NOT for fb_target_layer, ... */
 	    if (!(usage & GRALLOC_USAGE_HW_FB)) {
-	            if (!(usage & GRALLOC_USAGE_EXTERNAL_DISP) &&
+	            if ( !(GRALLOC_USAGE__RK_EXT__EXTERNAL_DISP == (usage & GRALLOC_USAGE__RK_EXT__EXTERNAL_DISP) ) &&
 	                MAGIC_USAGE_FOR_AFBC_LAYER == (usage & MAGIC_USAGE_FOR_AFBC_LAYER) ) {
 	                internal_format = MALI_GRALLOC_FORMAT_INTERNAL_RGBA_8888 | MALI_GRALLOC_INTFMT_AFBC_BASIC;
 	                D("use_afbc_layer: force to set 'internal_format' to 0x%llx for usage '0x%x'.", internal_format, usage);
@@ -1750,7 +1750,7 @@ struct gralloc_drm_bo_t *drm_gem_rockchip_alloc(
         /* IS for fb_target_layer, ... */
         else
         {
-	        if ( !(usage & GRALLOC_USAGE_EXTERNAL_DISP)
+	        if ( !(GRALLOC_USAGE__RK_EXT__EXTERNAL_DISP == (usage & GRALLOC_USAGE__RK_EXT__EXTERNAL_DISP ) )
                 && MAGIC_USAGE_FOR_AFBC_LAYER != (usage & MAGIC_USAGE_FOR_AFBC_LAYER) )
             {
                 /* if should NOT disable AFBC in fb_target_layer, ... */
