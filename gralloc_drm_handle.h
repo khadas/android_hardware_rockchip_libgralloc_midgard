@@ -192,6 +192,8 @@ struct gralloc_drm_handle_t {
 
 	int data_owner; /* owner of data (for validation) */
         // value 是 pid, buffer 被 alloc 的时候 首次有效设置.
+
+	uint32_t layer_count;
 };
 
 /**
