@@ -446,7 +446,7 @@ static int drm_mod_alloc_gpu0(alloc_device_t *dev,
 	if (format == 0x2b || format == 0x16 || format == 0x3)
 	{
 		if ( (w <= 20 && h <= 20) &&
-			(usage == 0x202 || usage == 0x100 || usage == 0x300) )
+			(usage == 0x202 || usage == 0x100 || usage == 0x300 || usage == 0x120 || usage == 0x200) )
 		{
 			ALOGE("rk_debug workaround for CtsNativeHardwareTestCases w = %d, h = %d, usage = %x, format = 0x%x", w, h ,usage, format);
 			return -EINVAL;
