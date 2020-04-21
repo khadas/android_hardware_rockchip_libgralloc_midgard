@@ -209,7 +209,7 @@ struct rk_driver_of_gralloc_drm_device_t {
  * 类似的接口还有 drm_gem_rockchip_alloc().
  * 为处理上述 case, 这里静态地保存 当前 rk_driver_of_gralloc_drm_device_t 实例的指针.
  */
-static struct rk_driver_of_gralloc_drm_device_t* s_rk_drv;
+static struct rk_driver_of_gralloc_drm_device_t* s_rk_drv = NULL;
 
 /* rockchip_gralloc_drm_buffer_object. */
 struct rockchip_buffer {
@@ -2534,6 +2534,12 @@ struct gralloc_drm_drv_t *gralloc_drm_drv_create_for_rockchip(int fd)
 		ALOGE("Failed to allocate rockchip gralloc device\n");
 		return NULL;
 	}
+
+    if ( s_rk_drv != NULL )
+    {
+        LOG_ALWAYS_FATAL("'s_rk_drv' has been inited as %p", s_rk_drv);
+    }
+
     s_rk_drv = rk_drv;
 
 	rk_drv->rk_drm_dev = rockchip_device_create(fd);
