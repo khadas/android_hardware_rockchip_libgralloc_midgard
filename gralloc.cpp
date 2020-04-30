@@ -29,7 +29,7 @@
 #define LOG_TAG "GRALLOC-MOD"
 
 // #define ENABLE_DEBUG_LOG
-#include <log/custom_log.h>
+#include "custom_log.h"
 
 #include <stdlib.h>
 #include <stdarg.h>

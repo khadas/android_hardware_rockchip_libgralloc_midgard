@@ -23,7 +23,7 @@
 
 #define LOG_TAG "gralloc"
 // #define ENABLE_DEBUG_LOG
-#include <log/custom_log.h>
+#include "custom_log.h"
 
 #include <string.h>
 #include <dlfcn.h>
