@@ -198,6 +198,7 @@ struct rk_driver_of_gralloc_drm_device_t {
      * .DP : drm_lock
      */
     mutable Mutex m_drm_lock;
+    int mfb_cnt;
 };
 
 /**
@@ -1792,7 +1793,11 @@ struct gralloc_drm_bo_t *drm_gem_rockchip_alloc(
                 && MAGIC_USAGE_FOR_AFBC_LAYER != (usage & MAGIC_USAGE_FOR_AFBC_LAYER) )
             {
                 /* if should NOT disable AFBC in fb_target_layer, ... */
-                if ( !should_disable_afbc_in_fb_target_layer() )
+                #if DYNAMIC_AFBC_TARGET
+                if ( !should_disable_afbc_in_fb_target_layer()  && s_rk_drv->mfb_cnt < 3)
+                #else
+                if ( !should_disable_afbc_in_fb_target_layer())
+                #endif
                 {
                     internal_format = MALI_GRALLOC_FORMAT_INTERNAL_RGBA_8888 | MALI_GRALLOC_INTFMT_AFBC_BASIC;
 
@@ -1802,15 +1807,21 @@ struct gralloc_drm_bo_t *drm_gem_rockchip_alloc(
                           internal_format);
                     }
                     property_set("vendor.gmali.fbdc_target","1");
+                    s_rk_drv->mfb_cnt ++; 
+	                ALOGD("rk-debug-gr use_afbc_layer: force to set 'internal_format' to 0x%" PRIx64 "for usage '0x%x'. fb_cnt=%d", internal_format, usage,s_rk_drv->mfb_cnt);
+                    
                 }
                 /* if SHOULD disable AFBC in fb_target_layer, ... */
                 else
                 {
+                    s_rk_drv->mfb_cnt ++;
                     if ( handle->prime_fd < 0 )
                     {
                         I("debug_only : not to use afbc in fb_target_layer, the original format : 0x%" PRIx64, internal_format);
                     }
 			        property_set("vendor.gmali.fbdc_target","0");
+	                ALOGD("rk-debug-gr no afbc fb_cnt=%d, internal_format=0x%" PRIx64, s_rk_drv->mfb_cnt,internal_format);
+			        
                 }
 	        }
 	        else
@@ -2388,6 +2399,12 @@ void drm_gem_rockchip_free(struct gralloc_drm_drv_t *drv,
                 return;
         }
 
+    if ((gr_handle->usage & GRALLOC_USAGE_HW_FB))
+    {
+        s_rk_drv->mfb_cnt --;
+        ALOGD("rk-debug-gr free s_rk_drv->mfb_cnt=%d ",s_rk_drv->mfb_cnt);
+    }
+    
 #if RK_DRM_GRALLOC
 #if MALI_AFBC_GRALLOC == 1
 	gralloc_buffer_attr_free( gr_handle );
@@ -2541,7 +2558,7 @@ struct gralloc_drm_drv_t *gralloc_drm_drv_create_for_rockchip(int fd)
     }
 
     s_rk_drv = rk_drv;
-
+    s_rk_drv->mfb_cnt = 0;
 	rk_drv->rk_drm_dev = rockchip_device_create(fd);
         // rockchip_device_create() 实现在 libdrm_rockchip.so 中.
 	if (!rk_drv->rk_drm_dev) {
