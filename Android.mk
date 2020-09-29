@@ -140,6 +140,10 @@ GRALLOC_INIT_AFBC?=1
 # not use afbc layer by default.
 USE_AFBC_LAYER = 0
 
+ifeq ($(strip $(BOARD_HS_DYNAMIC_AFBC_TARGET)), true)
+LOCAL_CFLAGS += -DDYNAMIC_AFBC_TARGET=1
+endif
+
 ifneq ($(filter rk3399 rk3399pro, $(strip $(TARGET_BOARD_PLATFORM))), )
 USE_AFBC_LAYER = 1
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)),box)
@@ -285,9 +289,6 @@ ifeq ($(TARGET_USES_HWC2),true)
     LOCAL_CFLAGS += -DUSE_HWC2
 endif
 
-ifeq ($(strip $(BOARD_HS_DYNAMIC_AFBC_TARGET)), true)
-LOCAL_CFLAGS += -DDYNAMIC_AFBC_TARGET=1
-endif
 
 LOCAL_MODULE := gralloc.$(TARGET_BOARD_HARDWARE)
 LOCAL_PROPRIETARY_MODULE := true
