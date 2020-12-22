@@ -16,14 +16,14 @@
  */
 
 filegroup {
-	name: "libgralloc_hidl_common_allocator",
+	name: "libgralloc_hidl_common_allocator_midgard",
 	srcs: [
 		"Allocator.cpp",
 	],
 }
 
 filegroup {
-	name: "libgralloc_hidl_common_mapper",
+	name: "libgralloc_hidl_common_mapper_midgard",
 	srcs: [
 		"Mapper.cpp",
 		"RegisteredHandlePool.cpp",
@@ -31,14 +31,14 @@ filegroup {
 }
 
 filegroup {
-	name: "libgralloc_hidl_common_mapper_metadata",
+	name: "libgralloc_hidl_common_mapper_metadata_midgard",
 	srcs: [
 		"MapperMetadata.cpp",
 	],
 }
 
 filegroup {
-	name: "libgralloc_hidl_common_shared_metadata",
+	name: "libgralloc_hidl_common_shared_metadata_midgard",
 	srcs: [
 		"SharedMetadata.cpp",
 	],

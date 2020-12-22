@@ -16,7 +16,7 @@
  */
 
 soong_config_module_type {
-	name: "arm_gralloc_cc_defaults",
+	name: "arm_gralloc_cc_defaults_midgard",
 	module_type: "cc_defaults",
 	config_namespace: "arm_gralloc",
 	variables: [
@@ -51,8 +51,8 @@ soong_config_bool_variable {
 	name: "gralloc_camera_write_raw16",
 }
 
-arm_gralloc_cc_defaults {
-	name: "arm_gralloc_defaults",
+arm_gralloc_cc_defaults_midgard {
+	name: "arm_gralloc_defaults_midgard",
 	owner: "arm",
 	vendor: true,
 	proprietary: true,
@@ -72,7 +72,7 @@ arm_gralloc_cc_defaults {
 		},
 	},
 	header_libs: [
-		"libgralloc_headers",
+		"libgralloc_headers_midgard",
 	],
 	target: {
 		android: {

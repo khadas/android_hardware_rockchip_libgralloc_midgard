@@ -16,7 +16,7 @@
  */
 
 soong_config_module_type {
-	name: "arm_gralloc_allocator_cc_defaults",
+	name: "arm_gralloc_allocator_cc_defaults_midgard",
 	module_type: "cc_defaults",
 	config_namespace: "arm_gralloc",
 	variables: [
@@ -43,10 +43,10 @@ soong_config_bool_variable {
 	name: "gralloc_use_ion_dmabuf_sync",
 }
 
-arm_gralloc_allocator_cc_defaults {
-	name: "arm_gralloc_allocator_defaults",
+arm_gralloc_allocator_cc_defaults_midgard {
+	name: "arm_gralloc_allocator_defaults_midgard",
 	defaults: [
-		"arm_gralloc_defaults",
+		"arm_gralloc_defaults_midgard",
 	],
 	soong_config_variables: {
 		gralloc_use_ion_dma_heap: {
@@ -92,9 +92,9 @@ arm_gralloc_allocator_cc_defaults {
 }
 
 cc_library_static {
-	name: "libgralloc_allocator",
+	name: "libgralloc_allocator_midgard",
 	defaults: [
-		"arm_gralloc_allocator_defaults",
-		"arm_gralloc_version_defaults",
+		"arm_gralloc_allocator_defaults_midgard",
+		"arm_gralloc_version_defaults_midgard",
 	],
 }

@@ -16,9 +16,9 @@
  */
 
 cc_defaults {
-	name: "arm_gralloc_core_defaults",
+	name: "arm_gralloc_core_defaults_midgard",
 	defaults: [
-		"arm_gralloc_defaults",
+		"arm_gralloc_defaults_midgard",
 	],
 	cflags: [
 		/* Minimum buffer dimensions in pixels when buffer will use AFBC */
@@ -52,10 +52,10 @@ cc_defaults {
 }
 
 cc_library_static {
-	name: "libgralloc_core",
+	name: "libgralloc_core_midgard",
 	defaults: [
-		"arm_gralloc_core_defaults",
-		"arm_gralloc_version_defaults",
+		"arm_gralloc_core_defaults_midgard",
+		"arm_gralloc_version_defaults_midgard",
 	],
 }
 

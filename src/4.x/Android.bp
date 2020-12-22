@@ -16,7 +16,7 @@
  */
 
 cc_defaults {
-	name: "arm_gralloc_version_defaults",
+	name: "arm_gralloc_version_defaults_midgard",
 	target: {
 		android: {
 			shared_libs: [
@@ -34,10 +34,10 @@ cc_defaults {
 }
 
 cc_defaults {
-	name: "arm_gralloc_api_4x_defaults",
+	name: "arm_gralloc_api_4x_defaults_midgard",
 	defaults: [
-		"arm_gralloc_defaults",
-		"arm_gralloc_version_defaults",
+		"arm_gralloc_defaults_midgard",
+		"arm_gralloc_version_defaults_midgard",
 	],
 	compile_multilib: "both",
 	relative_install_path: "hw/",
@@ -55,9 +55,9 @@ cc_defaults {
 	],
 	static_libs: [
 		"libarect",
-		"libgralloc_core",
-		"libgralloc_allocator",
-		"libgralloc_capabilities",
+		"libgralloc_core_midgard",
+		"libgralloc_allocator_midgard",
+		"libgralloc_capabilities_midgard",
 	],
 	header_libs: [
 		"libnativebase_headers",
@@ -68,9 +68,9 @@ cc_defaults {
 }
 
 cc_library_shared {
-	name: "android.hardware.graphics.allocator@4.0-impl-bifrost",
+	name: "android.hardware.graphics.allocator@4.0-impl-midgard",
 	defaults: [
-		"arm_gralloc_api_4x_defaults",
+		"arm_gralloc_api_4x_defaults_midgard",
 	],
 	shared_libs: [
 		"android.hardware.graphics.allocator@4.0",
@@ -78,15 +78,15 @@ cc_library_shared {
 	],
 	srcs: [
 		"GrallocAllocator.cpp",
-		":libgralloc_hidl_common_allocator",
-		":libgralloc_hidl_common_shared_metadata",
+		":libgralloc_hidl_common_allocator_midgard",
+		":libgralloc_hidl_common_shared_metadata_midgard",
 	],
 }
 
 cc_library_shared {
-	name: "android.hardware.graphics.mapper@4.0-impl-bifrost",
+	name: "android.hardware.graphics.mapper@4.0-impl-midgard",
 	defaults: [
-		"arm_gralloc_api_4x_defaults",
+		"arm_gralloc_api_4x_defaults_midgard",
 	],
 	static_libs: [
 		"libgralloc_drmutils",
@@ -97,8 +97,8 @@ cc_library_shared {
 	],
 	srcs: [
 		"GrallocMapper.cpp",
-		":libgralloc_hidl_common_mapper",
-		":libgralloc_hidl_common_mapper_metadata",
-		":libgralloc_hidl_common_shared_metadata",
+		":libgralloc_hidl_common_mapper_midgard",
+		":libgralloc_hidl_common_mapper_metadata_midgard",
+		":libgralloc_hidl_common_shared_metadata_midgard",
 	],
 }

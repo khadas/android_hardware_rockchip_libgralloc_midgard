@@ -17,7 +17,7 @@
  */
 
 cc_library_headers {
-	name: "libgralloc_headers",
+	name: "libgralloc_headers_midgard",
 	vendor: true,
 	host_supported: true,
 	export_include_dirs: [
