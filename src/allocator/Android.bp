@@ -19,28 +19,9 @@ soong_config_module_type {
 	name: "arm_gralloc_allocator_cc_defaults_midgard",
 	module_type: "cc_defaults",
 	config_namespace: "arm_gralloc",
-	variables: [
-		"gralloc_use_ion_dma_heap",
-		"gralloc_use_ion_compound_page_heap",
-		"gralloc_init_afbc",
-		"gralloc_use_ion_dmabuf_sync",
-	],
 	properties: [
 		"cflags",
 	],
-}
-
-soong_config_bool_variable {
-	name: "gralloc_use_ion_dma_heap",
-}
-soong_config_bool_variable {
-	name: "gralloc_use_ion_compound_page_heap",
-}
-soong_config_bool_variable {
-	name: "gralloc_init_afbc",
-}
-soong_config_bool_variable {
-	name: "gralloc_use_ion_dmabuf_sync",
 }
 
 arm_gralloc_allocator_cc_defaults_midgard {
@@ -48,28 +29,9 @@ arm_gralloc_allocator_cc_defaults_midgard {
 	defaults: [
 		"arm_gralloc_defaults_midgard",
 	],
-	soong_config_variables: {
-		gralloc_use_ion_dma_heap: {
-			cflags: [
-				"-DGRALLOC_USE_ION_DMA_HEAP=1",
-			],
-		},
-		gralloc_use_ion_compound_page_heap: {
-			cflags: [
-				"-DGRALLOC_USE_ION_COMPOUND_PAGE_HEAP=1",
-			],
-		},
-		gralloc_init_afbc: {
-			cflags: [
-				"-DGRALLOC_INIT_AFBC=1",
-			],
-		},
-		gralloc_use_ion_dmabuf_sync: {
-			cflags: [
-				"-DGRALLOC_USE_ION_DMABUF_SYNC=1",
-			],
-		},
-	},
+        cflags: [
+                "-DGRALLOC_INIT_AFBC=1",
+        ],
 	srcs: [
 		"mali_gralloc_ion.cpp",
 		"mali_gralloc_shared_memory.cpp",
