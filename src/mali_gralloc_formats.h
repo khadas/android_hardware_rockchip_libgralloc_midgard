@@ -38,6 +38,9 @@ typedef uint64_t mali_gralloc_internal_format;
 #define MALI_GRALLOC_INTFMT_EXT_WRAP_MASK 0xffff0000ULL
 #define MALI_GRALLOC_INTFMT_EXT_WRAP_SHIFT 16
 
+// for mali_so_on_midgard_ddk_r18
+#define MALI_GRALLOC_INTFMT_ME_EXT_MASK		MALI_GRALLOC_INTFMT_EXT_MASK
+
 /* Format Modifier Bits Locations */
 #define MALI_GRALLOC_INTFMT_EXTENSION_BIT_START 32
 
