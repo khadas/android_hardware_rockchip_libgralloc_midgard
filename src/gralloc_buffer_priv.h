@@ -38,6 +38,8 @@ struct attr_region
 	int32_t crop_height;
 	int32_t crop_width;
 	android_dataspace_t dataspace;
+	int use_yuv_transform;
+	int use_sparse_alloc;
 
 #ifdef __cplusplus
 	attr_region()
@@ -46,6 +48,8 @@ struct attr_region
 	    , crop_height(-1)
 	    , crop_width(-1)
 	    , dataspace(HAL_DATASPACE_UNKNOWN)
+	    , use_yuv_transform(0)
+	    , use_sparse_alloc(0)
 	{
 	}
 #endif
@@ -56,7 +60,7 @@ static_assert(sizeof(android_dataspace_t) == 4, "Unexpected size");
  * The purpose of this assert is to ensure 32-bit and 64-bit ABIs have a consistent view
  * of the memory. The assert shouldn't contain any sizeof(), as sizeof() is ABI-dependent.
  */
-static_assert(sizeof(struct attr_region) == (5 * 4), "Unexpected size");
+static_assert(sizeof(struct attr_region) == ( (5 + 2) * 4), "Unexpected size"); // "2" : 新增的 attr_region::use_yuv_transform 和 ::use_sparse_alloc
 
 typedef struct attr_region attr_region;
 
@@ -177,6 +181,16 @@ static inline int gralloc_buffer_attr_write(struct private_handle_t *hnd, buf_at
 			region->dataspace = *((android_dataspace_t *)val);
 			rval = 0;
 			break;
+
+		case GRALLOC_ARM_BUFFER_ATTR_AFBC_YUV_TRANS:
+			region->use_yuv_transform = *val;
+			rval = 0;
+			break;
+
+		case GRALLOC_ARM_BUFFER_ATTR_AFBC_SPARSE_ALLOC:
+			region->use_sparse_alloc = *val;
+			rval = 0;
+			break;
 		}
 	}
 
@@ -212,6 +226,16 @@ static inline int gralloc_buffer_attr_read(struct private_handle_t *hnd, buf_att
 
 		case GRALLOC_ARM_BUFFER_ATTR_DATASPACE:
 			*val = region->dataspace;
+			rval = 0;
+			break;
+
+		case GRALLOC_ARM_BUFFER_ATTR_AFBC_YUV_TRANS:
+			*val = region->use_yuv_transform;
+			rval = 0;
+			break;
+
+		case GRALLOC_ARM_BUFFER_ATTR_AFBC_SPARSE_ALLOC:
+			*val = region->use_sparse_alloc;
 			rval = 0;
 			break;
 		}

@@ -44,6 +44,12 @@ enum
 	/* Dataspace - used for YUV to RGB conversion. */
 	GRALLOC_ARM_BUFFER_ATTR_DATASPACE = 2,
 
+	/* Set if the AFBC format used a YUV transform before compressing */
+	GRALLOC_ARM_BUFFER_ATTR_AFBC_YUV_TRANS = 3,
+
+	/* Set if the AFBC format uses sparse allocation */
+	GRALLOC_ARM_BUFFER_ATTR_AFBC_SPARSE_ALLOC = 4,
+
 	GRALLOC_ARM_BUFFER_ATTR_LAST
 };
 
