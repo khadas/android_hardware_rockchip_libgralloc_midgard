@@ -19,6 +19,10 @@
 #ifndef GRALLOC_BUFFER_PRIV_H_
 #define GRALLOC_BUFFER_PRIV_H_
 
+// #define LOG_TAG "mali_so"
+#define ENABLE_DEBUG_LOG
+#include "custom_log.h"
+
 #include "mali_gralloc_buffer.h"
 #include "mali_gralloc_formats.h"
 #include "gralloc_helper.h"
@@ -74,6 +78,7 @@ struct buffer_descriptor_t;
  */
 static inline int gralloc_buffer_attr_map(struct private_handle_t *hnd, int readwrite)
 {
+#if 0
 	int rval = -1;
 	int prot_flags = PROT_READ;
 
@@ -111,6 +116,12 @@ static inline int gralloc_buffer_attr_map(struct private_handle_t *hnd, int read
 
 out:
 	return rval;
+#else
+	GRALLOC_UNUSED(hnd);
+	GRALLOC_UNUSED(readwrite);
+
+	return 0;
+#endif
 }
 
 /*
@@ -120,6 +131,7 @@ out:
  */
 static inline int gralloc_buffer_attr_unmap(struct private_handle_t *hnd)
 {
+#if 0
 	int rval = -1;
 
 	if (!hnd)
@@ -144,6 +156,11 @@ static inline int gralloc_buffer_attr_unmap(struct private_handle_t *hnd)
 
 out:
 	return rval;
+#else
+	GRALLOC_UNUSED(hnd);
+
+	return 0;
+#endif
 }
 
 /*
@@ -153,6 +170,7 @@ out:
  */
 static inline int gralloc_buffer_attr_write(struct private_handle_t *hnd, buf_attr attr, int *val)
 {
+#if 0
 	int rval = -1;
 
 	if (!hnd || !val || attr >= GRALLOC_ARM_BUFFER_ATTR_LAST)
@@ -196,6 +214,14 @@ static inline int gralloc_buffer_attr_write(struct private_handle_t *hnd, buf_at
 
 out:
 	return rval;
+#else
+	GRALLOC_UNUSED(hnd);
+	GRALLOC_UNUSED(val);
+
+	W("unexpected calling in, 'attr' : %d", attr);
+
+	return 0;
+#endif
 }
 
 static inline int gralloc_buffer_attr_read(struct private_handle_t *hnd, buf_attr attr, int *val)
@@ -207,6 +233,7 @@ static inline int gralloc_buffer_attr_read(struct private_handle_t *hnd, buf_att
 		goto out;
 	}
 
+#if 0
 	if (hnd->imapper_version >= 400)
 	{
 		MALI_GRALLOC_LOGE("Legacy attribute region not supported on Gralloc v4+");
@@ -240,6 +267,35 @@ static inline int gralloc_buffer_attr_read(struct private_handle_t *hnd, buf_att
 			break;
 		}
 	}
+#else
+	/* 参照 drm_based_mali_so_of_m_r18 调用本函数时的状态, 都返回无效值. */
+	switch (attr)
+	{
+	case GRALLOC_ARM_BUFFER_ATTR_CROP_RECT:
+		val[0] = -1;
+		val[1] = -1;
+		val[2] = -1;
+		val[3] = -1;
+		rval = 0;
+		break;
+
+	case GRALLOC_ARM_BUFFER_ATTR_DATASPACE:
+		W("unexpected GRALLOC_ARM_BUFFER_ATTR_DATASPACE.");
+		*val = -1;
+		rval = 0;
+		break;
+
+	case GRALLOC_ARM_BUFFER_ATTR_AFBC_YUV_TRANS:
+		*val = -1;
+		rval = 0;
+		break;
+
+	case GRALLOC_ARM_BUFFER_ATTR_AFBC_SPARSE_ALLOC:
+		*val = -1;
+		rval = 0;
+		break;
+	}
+#endif
 out:
 	return rval;
 }
