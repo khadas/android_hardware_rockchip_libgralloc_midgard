@@ -992,11 +992,18 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 		}
 	}
 #else
+#if 0
 	/* Clear all legacy values. */
 	bufDescriptor->old_internal_format = 0;
 	bufDescriptor->old_alloc_width = 0;
 	bufDescriptor->old_alloc_height = 0;
 	bufDescriptor->old_byte_stride = 0;
+#else
+	/* 对 deprecated_members 预赋值, 且不清 'bufDescriptor->old_internal_format'.*/
+	bufDescriptor->old_byte_stride = bufDescriptor->plane_info[0].byte_stride;
+	bufDescriptor->old_alloc_width = bufDescriptor->plane_info[0].alloc_width;
+	bufDescriptor->old_alloc_height = bufDescriptor->plane_info[0].alloc_height;
+#endif
 #endif
 
 	/*
