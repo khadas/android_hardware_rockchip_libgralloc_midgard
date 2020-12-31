@@ -361,7 +361,9 @@ void mali_gralloc_adjust_dimensions(const uint64_t internal_format,
                                     int* const width,
                                     int* const height);
 
-uint64_t mali_gralloc_select_format(const uint64_t req_format,
+uint64_t mali_gralloc_select_format(const int width,
+				    const int height,
+				    const uint64_t req_format,
                                     const mali_gralloc_format_type type,
                                     const uint64_t usage,
                                     const int buffer_size,

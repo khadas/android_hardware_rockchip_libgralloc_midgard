@@ -1614,10 +1614,12 @@ static bool is_no_afbc_for_fb_target_layer_required_via_prop()
 	return (0 == strcmp("1", value) );
 }
 
-static uint64_t rk_gralloc_select_format(const uint64_t req_format,
+static uint64_t rk_gralloc_select_format(const int width,
+					 const int height,
+					 const uint64_t req_format,
 					 const uint64_t usage)
 {
-	GRALLOC_UNUSED(usage);
+	GRALLOC_UNUSED(width);
 	uint64_t internal_format = req_format;
 
 	/*-------------------------------------------------------*/
@@ -1719,11 +1721,27 @@ static uint64_t rk_gralloc_select_format(const uint64_t req_format,
 				break;
 
 			case RK356X:
-			case RK3399:
 				I("to allocate AFBC buffer for fb_target_layer on rk356x.");
 				internal_format = 
 					MALI_GRALLOC_FORMAT_INTERNAL_RGBA_8888
 					| MALI_GRALLOC_INTFMT_AFBC_BASIC;
+				break;
+
+			case RK3399:
+				/* 若 height < 2160, 且 buffer 将 "不是" 用于 external_display, */
+				if ( (height < 2160)
+					&& (RK_GRALLOC_USAGE_EXTERNAL_DISP != (usage & RK_GRALLOC_USAGE_EXTERNAL_DISP) ) )
+				{
+					/* 使用 AFBC format */
+					I("to allocate AFBC buffer for fb_target_layer on 3399.");
+					internal_format = 
+						MALI_GRALLOC_FORMAT_INTERNAL_RGBA_8888
+						| MALI_GRALLOC_INTFMT_AFBC_BASIC;
+					break;
+				}
+
+				/* 使用 非 AFBC format */
+				internal_format = req_format;
 				break;
 
 			default:
@@ -1805,7 +1823,9 @@ static uint64_t rk_gralloc_select_format(const uint64_t req_format,
  *         MALI_GRALLOC_FORMAT_INTERNAL_UNDEFINED, where no suitable
  *         format could be found.
  */
-uint64_t mali_gralloc_select_format(const uint64_t req_format,
+uint64_t mali_gralloc_select_format(const int width,
+				    const int height,
+				    const uint64_t req_format,
                                     const mali_gralloc_format_type type,
                                     const uint64_t usage,
                                     const int buffer_size,
@@ -1819,7 +1839,7 @@ uint64_t mali_gralloc_select_format(const uint64_t req_format,
 	GRALLOC_UNUSED(buffer_size);
 	uint64_t alloc_format;
 
-	*internal_format = rk_gralloc_select_format(req_format, usage);
+	*internal_format = rk_gralloc_select_format(width, height, req_format, usage);
 
 	alloc_format = *internal_format;
 

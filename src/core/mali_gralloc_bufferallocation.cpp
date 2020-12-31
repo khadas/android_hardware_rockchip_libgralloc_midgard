@@ -749,7 +749,9 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 	* Select optimal internal pixel format based upon
 	* usage and requested format.
 	*/
-	bufDescriptor->alloc_format = mali_gralloc_select_format(bufDescriptor->hal_format,
+	bufDescriptor->alloc_format = mali_gralloc_select_format(alloc_width,
+								 alloc_height,
+								 bufDescriptor->hal_format,
 	                                                         bufDescriptor->format_type,
 	                                                         usage,
 	                                                         bufDescriptor->width * bufDescriptor->height,
