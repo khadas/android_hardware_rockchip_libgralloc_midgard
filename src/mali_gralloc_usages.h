@@ -190,6 +190,13 @@ typedef enum
 	 */
 	RK_GRALLOC_USAGE_SPECIFY_STRIDE = GRALLOC_USAGE_PRIVATE_2,
 
+	/* 表征当前待分配的 buffer 将被使用在 external_display 的 fb_target_layer 中.
+	 * 引入本 private_usage_bit 的原因如下 :
+	 *		目前框架在传递 usage 的流程中会将 GRALLOC_USAGE_EXTERNAL_DISP reset 掉,
+	 *		参见 frameworks/native/ 下的 commit "12ca527 libui: filter out invalid buffer usage bits".
+	 */
+	RK_GRALLOC_USAGE_EXTERNAL_DISP = GRALLOC_USAGE_PRIVATE_12,
+
 	/* See comment for Gralloc 1.0, above. */
 	MALI_GRALLOC_USAGE_FRONTBUFFER = GRALLOC_USAGE_PRIVATE_0,
 
