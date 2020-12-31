@@ -1546,6 +1546,7 @@ typedef enum rk_board_platform_t
 {
 	RK3326,
 	RK356X,
+	RK3399,
 	RK_BOARD_PLATFORM_UNKNOWN,
 } rk_board_platform_t;
 
@@ -1568,9 +1569,13 @@ static rk_board_platform_t get_rk_board_platform()
 		{
 			s_platform = RK356X;
 		}
+		else if (0 == strcmp("rk3399", value) )
+		{
+			s_platform = RK3399;
+		}
 		else
 		{
-			LOG_ALWAYS_FATAL("unexpected 'value' : %s", value);
+			W("unexpected 'value' : %s", value);
 			return RK_BOARD_PLATFORM_UNKNOWN;
 		}
 	}
@@ -1714,6 +1719,7 @@ static uint64_t rk_gralloc_select_format(const uint64_t req_format,
 				break;
 
 			case RK356X:
+			case RK3399:
 				I("to allocate AFBC buffer for fb_target_layer on rk356x.");
 				internal_format = 
 					MALI_GRALLOC_FORMAT_INTERNAL_RGBA_8888
@@ -1721,7 +1727,7 @@ static uint64_t rk_gralloc_select_format(const uint64_t req_format,
 				break;
 
 			default:
-				LOG_ALWAYS_FATAL("unexpected 'platform' : %d", platform);
+				W("unexpected 'platform' : %d", platform);
 				break;
 			}
 
