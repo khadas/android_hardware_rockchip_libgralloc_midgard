@@ -89,7 +89,7 @@ cc_library_shared {
 		"arm_gralloc_api_4x_defaults_midgard",
 	],
 	static_libs: [
-		"libgralloc_drmutils",
+		"libgralloc_drmutils_midgard",
 	],
 	shared_libs: [
 		"arm.graphics-ndk_platform",
