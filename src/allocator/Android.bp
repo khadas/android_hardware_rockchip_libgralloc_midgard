@@ -31,6 +31,7 @@ arm_gralloc_allocator_cc_defaults_midgard {
 	],
         cflags: [
                 "-DGRALLOC_INIT_AFBC=1",
+                "-DGRALLOC_USE_ION_DMABUF_SYNC=1",
         ],
 	srcs: [
 		"mali_gralloc_ion.cpp",
