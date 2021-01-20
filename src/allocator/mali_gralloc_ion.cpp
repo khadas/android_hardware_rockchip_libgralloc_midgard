@@ -152,7 +152,7 @@ private:
 	int open_and_query_ion();
 };
 
-static void set_ion_flags(enum ion_heap_type heap_type, uint64_t usage,
+static void set_ion_flags(enum ion_heap_type heap_type, uint64_t usage, bool force_cachable,
                           unsigned int *priv_heap_flag, unsigned int *ion_flags)
 {
 #if !defined(GRALLOC_USE_ION_DMA_HEAP) || !GRALLOC_USE_ION_DMA_HEAP
@@ -175,6 +175,11 @@ static void set_ion_flags(enum ion_heap_type heap_type, uint64_t usage,
 		if (heap_type != ION_HEAP_TYPE_DMA)
 		{
 #endif
+			if ( force_cachable )
+			{
+				*ion_flags = ION_FLAG_CACHED | ION_FLAG_CACHED_NEEDS_SYNC;
+				return;
+			}
 			if ((usage & GRALLOC_USAGE_SW_READ_MASK) == GRALLOC_USAGE_SW_READ_OFTEN)
 			{
 				*ion_flags = ION_FLAG_CACHED | ION_FLAG_CACHED_NEEDS_SYNC;
@@ -266,7 +271,7 @@ int ion_device::alloc_from_ion_heap(uint64_t usage, size_t size, enum ion_heap_t
 		heap_type = ION_HEAP_TYPE_SYSTEM;
 
 		/* Set ION flags for system heap allocation */
-		set_ion_flags(heap_type, usage, NULL, &flags);
+		set_ion_flags(heap_type, usage, false, NULL, &flags);
 
 		if (use_legacy_ion == false)
 		{
@@ -402,7 +407,7 @@ bool ion_device::check_buffers_sharable(const gralloc_buffer_descriptor_t *descr
 			return false;
 		}
 
-		set_ion_flags(heap_type, usage, NULL, &ion_flags);
+		set_ion_flags(heap_type, usage, false, NULL, &ion_flags);
 
 		if (shared_backend_heap_type != ION_HEAP_TYPE_INVALID)
 		{
@@ -753,7 +758,7 @@ int mali_gralloc_ion_allocate(const gralloc_buffer_descriptor_t *descriptors,
 			return -1;
 		}
 
-		set_ion_flags(heap_type, usage, &priv_heap_flag, &ion_flags);
+		set_ion_flags(heap_type, usage, false, &priv_heap_flag, &ion_flags);
 
 		shared_fd = dev->alloc_from_ion_heap(usage, max_bufDescriptor->size, heap_type, ion_flags, &min_pgsz);
 
@@ -828,6 +833,7 @@ int mali_gralloc_ion_allocate(const gralloc_buffer_descriptor_t *descriptors,
 	{
 		for (i = 0; i < numDescriptors; i++)
 		{
+			bool force_cachable = false; // 是否强制分配 cachable 的 buffer.
 			buffer_descriptor_t *bufDescriptor = (buffer_descriptor_t *)(descriptors[i]);
 			usage = bufDescriptor->consumer_usage | bufDescriptor->producer_usage;
 
@@ -839,7 +845,12 @@ int mali_gralloc_ion_allocate(const gralloc_buffer_descriptor_t *descriptors,
 				return -1;
 			}
 
-			set_ion_flags(heap_type, usage, &priv_heap_flag, &ion_flags);
+			if ( HAL_PIXEL_FORMAT_YCrCb_NV12_10 == bufDescriptor->hal_format )
+			{
+				I("force to allocate cachable buffers for supporting_rk_nv12_10_buffer_in_sf_gles_composition");
+				force_cachable = true;
+			}
+			set_ion_flags(heap_type, usage, force_cachable, &priv_heap_flag, &ion_flags);
 
 			shared_fd = dev->alloc_from_ion_heap(usage, bufDescriptor->size, heap_type, ion_flags, &min_pgsz);
 
