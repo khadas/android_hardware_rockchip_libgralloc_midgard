@@ -1547,6 +1547,7 @@ typedef enum rk_board_platform_t
 	RK3326,
 	RK356X,
 	RK3399,
+	RK3288,
 	RK_BOARD_PLATFORM_UNKNOWN,
 } rk_board_platform_t;
 
@@ -1572,6 +1573,10 @@ static rk_board_platform_t get_rk_board_platform()
 		else if (0 == strcmp("rk3399", value) )
 		{
 			s_platform = RK3399;
+		}
+		else if (0 == strcmp("rk3288", value) )
+		{
+			s_platform = RK3288;
 		}
 		else
 		{
@@ -1740,6 +1745,12 @@ static uint64_t rk_gralloc_select_format(const int width,
 					break;
 				}
 
+				/* 使用 非 AFBC format */
+				internal_format = req_format;
+				break;
+
+			case RK3288:
+				I("to allocate non AFBC buffer for fb_target_layer on rk3288.");
 				/* 使用 非 AFBC format */
 				internal_format = req_format;
 				break;
