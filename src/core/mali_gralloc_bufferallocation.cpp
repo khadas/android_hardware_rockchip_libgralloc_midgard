@@ -615,6 +615,10 @@ static void calc_allocation_size(const int width,
 				assert((plane_info[plane].byte_stride * 8) % format.bpp[plane] == 0);
 				*pixel_stride = (plane_info[plane].byte_stride * 8) / format.bpp[plane];
 			}
+			else
+			{
+				MALI_GRALLOC_LOGV("buffer is not CPU accessible, leave *pixel_stride as 0. GraphicBuffer::getString() would return 0");
+			}
 
 			MALI_GRALLOC_LOGV("Pixel stride: %d", *pixel_stride);
 		}
