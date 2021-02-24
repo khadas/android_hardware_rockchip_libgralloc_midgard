@@ -845,16 +845,11 @@ int mali_gralloc_ion_allocate(const gralloc_buffer_descriptor_t *descriptors,
 				return -1;
 			}
 
-#if 0
 			if ( HAL_PIXEL_FORMAT_YCrCb_NV12_10 == bufDescriptor->hal_format )
 			{
 				I("force to allocate cachable buffers for supporting_rk_nv12_10_buffer_in_sf_gles_composition");
 				force_cachable = true;
 			}
-#else
-			ALOGI("force to make all graphics_buffer cachable.");
-			force_cachable = true;
-#endif
 			set_ion_flags(heap_type, usage, force_cachable, &priv_heap_flag, &ion_flags);
 
 			shared_fd = dev->alloc_from_ion_heap(usage, bufDescriptor->size, heap_type, ion_flags, &min_pgsz);
