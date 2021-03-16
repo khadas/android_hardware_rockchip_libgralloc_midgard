@@ -845,6 +845,13 @@ int mali_gralloc_ion_allocate(const gralloc_buffer_descriptor_t *descriptors,
 				return -1;
 			}
 
+			if (bufDescriptor->hal_format == HAL_PIXEL_FORMAT_RGBA_FP16)
+			{
+				ALOGE("Error: Midgard can not support HAL_PIXEL_FORMAT_RGBA_FP16");
+				mali_gralloc_ion_free_internal(pHandle, numDescriptors);
+				return -1;
+			}
+
 			if ( HAL_PIXEL_FORMAT_YCrCb_NV12_10 == bufDescriptor->hal_format )
 			{
 				I("force to allocate cachable buffers for supporting_rk_nv12_10_buffer_in_sf_gles_composition");
