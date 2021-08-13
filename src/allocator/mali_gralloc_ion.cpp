@@ -30,7 +30,7 @@
 #include <cutils/atomic.h>
 
 #include <ion/ion.h>
-#include <ion/ion_4.12.h>
+#include <linux/ion_4.12.h>
 #include <linux/dma-buf.h>
 #include <vector>
 #include <sys/ioctl.h>

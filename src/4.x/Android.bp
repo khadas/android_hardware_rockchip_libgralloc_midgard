@@ -92,7 +92,7 @@ cc_library_shared {
 		"libgralloc_drmutils_midgard",
 	],
 	shared_libs: [
-		"arm.graphics-ndk_platform",
+		"arm.graphics-V2-ndk_platform",
 		"android.hardware.graphics.mapper@4.0",
 	],
 	srcs: [

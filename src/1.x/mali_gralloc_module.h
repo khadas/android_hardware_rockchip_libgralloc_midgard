@@ -32,7 +32,7 @@
 #endif
 #endif
 
-#include <ion/ion_4.12.h>
+#include <linux/ion_4.12.h>
 
 #include "mali_gralloc_log.h"
 

@@ -48,6 +48,7 @@ arm_gralloc_cc_defaults_midgard {
 	},
 	header_libs: [
 		"libgralloc_headers_midgard",
+		"libhardware_rockchip_headers",
 	],
 	target: {
 		android: {
