@@ -31,7 +31,8 @@ cc_library_static {
         "libcutils",
     ],
     header_libs: [
-        "libgralloc_headers",
+        "libgralloc_headers_midgard",
+        "libhardware_rockchip_headers",
     ],
     include_dirs: [
         ".",
@@ -43,6 +44,6 @@ cc_library_static {
         "libdrm",
     ],
     export_header_lib_headers: [
-        "libgralloc_headers",
+        "libgralloc_headers_midgard",
     ],
 }
