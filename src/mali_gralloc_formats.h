@@ -24,7 +24,6 @@
 #include "mali_gralloc_log.h"
 
 #include <hardware/hardware_rockchip.h>
-#include <hardware/gralloc_rockchip.h>
 
 /* Internal formats are represented in gralloc as a 64bit identifier
  * where the 32 lower bits are a base format and the 32 upper bits are modifiers.
