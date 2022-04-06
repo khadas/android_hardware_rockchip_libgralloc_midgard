@@ -172,6 +172,15 @@ namespace hidl_common = android::hardware::graphics::common::V1_1;
 #define GRALLOC_USAGE_PRIVATE_1 1ULL << 29
 #define GRALLOC_USAGE_PRIVATE_2 1ULL << 30
 #define GRALLOC_USAGE_PRIVATE_3 1ULL << 31
+
+#define GRALLOC_USAGE_PRIVATE_4 1ULL << 63
+#define GRALLOC_USAGE_PRIVATE_5 1ULL << 62
+#define GRALLOC_USAGE_PRIVATE_6 1ULL << 61
+#define GRALLOC_USAGE_PRIVATE_7 1ULL << 60
+#define GRALLOC_USAGE_PRIVATE_8 1ULL << 59
+#define GRALLOC_USAGE_PRIVATE_9 1ULL << 58
+#define GRALLOC_USAGE_PRIVATE_10 1ULL << 57
+
 #define GRALLOC_USAGE_PRIVATE_11 1ULL << 56
 #define GRALLOC_USAGE_PRIVATE_12 1ULL << 55
 #define GRALLOC_USAGE_PRIVATE_13 1ULL << 54
@@ -184,6 +193,22 @@ namespace hidl_common = android::hardware::graphics::common::V1_1;
 
 typedef enum
 {
+	/* 表征 client 要求 buffer 的 pixel_stride 是 16 对齐.
+	 * 仅 配合 HAL_PIXEL_FORMAT_YCrCb_NV12 等特定 rk_video_formats 使用.
+	 */
+	RK_GRALLOC_USAGE_STRIDE_ALIGN_16 = GRALLOC_USAGE_PRIVATE_10,
+	/* 表征 client 要求 buffer 的 pixel_stride 是 128 对齐.
+	 * 仅 配合 HAL_PIXEL_FORMAT_YCrCb_NV12 等特定 rk_video_formats 使用.
+	 */
+	RK_GRALLOC_USAGE_STRIDE_ALIGN_128 = GRALLOC_USAGE_PRIVATE_9,
+	/* 表征 client 要求 buffer 的 pixel_stride 是 256 的奇数倍.
+	 * 仅 配合 HAL_PIXEL_FORMAT_YCrCb_NV12 等特定 rk_video_formats 使用.
+	 */
+	RK_GRALLOC_USAGE_STRIDE_ALIGN_256_ODD_TIMES = GRALLOC_USAGE_PRIVATE_8,
+	/* 表征 client 要求 buffer 的 pixel_stride 是 64 对齐.
+	 * 仅 配合 HAL_PIXEL_FORMAT_YCrCb_NV12 等特定 rk_video_formats 使用.
+	 */
+	RK_GRALLOC_USAGE_STRIDE_ALIGN_64 = GRALLOC_USAGE_PRIVATE_7,
 
 	/* 表征 "当前 调用 alloc() 的 client 通过 width 指定了其预期的 buffer stride",
 	 * 即要求 gralloc 遵循 rk_implicit_alloc_semantic (即 满足 implicit_requirement_for_rk_gralloc_allocate).

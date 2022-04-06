@@ -124,9 +124,9 @@ static rect_t get_afbc_sb_size(alloc_type_t alloc_type, const uint8_t plane)
 	}
 }
 
-static void adjust_rk_video_buffer_size(buffer_descriptor_t* const bufDescriptor)
+static void adjust_rk_video_buffer_size(buffer_descriptor_t* const bufDescriptor, const format_info_t* format)
 {
-	const uint32_t width = bufDescriptor->width;
+	const uint32_t pixel_stride = bufDescriptor->plane_info[0].byte_stride * 8 / (format->bpp[0]);
 	const uint32_t height = bufDescriptor->height;
 	const uint32_t base_format = bufDescriptor->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
 	size_t size_needed_by_rk_video = 0;
@@ -139,12 +139,12 @@ static void adjust_rk_video_buffer_size(buffer_descriptor_t* const bufDescriptor
 			 * .KP : from CSY : video_decoder 需要的 NV12 buffer 中除了 YUV 数据还有其他 metadata, 要更多的空间.
 			 *		    2 * w * h 一定够.
 			 */
-			size_needed_by_rk_video = 2 * width * height;
+			size_needed_by_rk_video = 2 * pixel_stride * height;
 			break;
 		}
 		case MALI_GRALLOC_FORMAT_INTERNAL_NV16:
 		{
-			size_needed_by_rk_video = 2.5 * width * height; // 根据 陈锦森的 要求
+			size_needed_by_rk_video = 2.5 * pixel_stride * height; // 根据 陈锦森的 要求
 			break;
 		}
 		default:
@@ -501,6 +501,15 @@ static void update_yv12_stride(int8_t plane,
  * @param format          [in]    Pixel format.
  * @param has_cpu_usage   [in]    CPU usage requested (in addition to any other).
  * @param pixel_stride    [out]   Calculated pixel stride.
+ * @param is_stride_specified 
+ *			  [in]	  待分配的 buffer 是否被具体指定了, 和 RK_GRALLOC_USAGE_SPECIFY_STRIDE 有关.
+ * @param usage_flag_for_stride_alignmen
+ *			  [in]	  若非 0, 表征 client 具体指定的待分配的 buffer pixel_stride 的对齐方式,
+ *					value 可能是 如下 bit 中的某一个: 
+ *						RK_GRALLOC_USAGE_STRIDE_ALIGN_16,
+ *						RK_GRALLOC_USAGE_STRIDE_ALIGN_64,
+ *						RK_GRALLOC_USAGE_STRIDE_ALIGN_128,
+ *						RK_GRALLOC_USAGE_STRIDE_ALIGN_256_ODD_TIMES.
  * @param size            [out]   Total calculated buffer size including all planes.
  * @param plane_info      [out]   Array of calculated information for each plane. Includes
  *                                offset, byte stride and allocation width and height.
@@ -512,6 +521,7 @@ static void calc_allocation_size(const int width,
                                  const bool has_cpu_usage,
                                  const bool has_hw_usage,
 				 const bool is_stride_specified,
+				 const uint64_t usage_flag_for_stride_alignment,
                                  int * const pixel_stride,
                                  size_t * const size,
                                  plane_info_t plane_info[MAX_PLANES])
@@ -585,6 +595,44 @@ static void calc_allocation_size(const int width,
 			if (stride_align)
 			{
 				plane_info[plane].byte_stride = GRALLOC_ALIGN(plane_info[plane].byte_stride * format.tile_size, stride_align) / format.tile_size;
+			}
+
+			if ( usage_flag_for_stride_alignment != 0 )
+			{
+				uint32_t pixel_stride = 0;
+
+				switch ( usage_flag_for_stride_alignment )
+				{
+				case RK_GRALLOC_USAGE_STRIDE_ALIGN_16:
+					pixel_stride = GRALLOC_ALIGN(width, 16);
+					break;
+
+				case RK_GRALLOC_USAGE_STRIDE_ALIGN_64:
+					pixel_stride = GRALLOC_ALIGN(width, 64);
+					break;
+
+				case RK_GRALLOC_USAGE_STRIDE_ALIGN_128:
+					pixel_stride = GRALLOC_ALIGN(width, 128);
+					break;
+
+				case RK_GRALLOC_USAGE_STRIDE_ALIGN_256_ODD_TIMES:
+					pixel_stride = ( (width + 255) & (~255) ) | (256);
+					break;
+
+				default:
+					E("unexpected 'usage_flag_for_stride_alignment': 0x%" PRIx64,
+					  usage_flag_for_stride_alignment);
+					break;
+				}
+
+				if ( 0 == plane )
+				{
+					plane_info[plane].byte_stride = pixel_stride * format.bpp[plane] / 8;
+				}
+				else // for sub-sample (sub-sampled) planes.
+				{
+					plane_info[plane].byte_stride = pixel_stride * format.bpp[plane] / 8 / format.hsub;
+				}
 			}
 
 			/*
@@ -740,6 +788,8 @@ static bool validate_format(const format_info_t * const format,
 	return true;
 }
 
+/*---------------------------------------------------------------------------*/
+
 int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescriptor)
 {
 	alloc_type_t alloc_type{};
@@ -820,9 +870,10 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 	                     alloc_height,
 	                     alloc_type,
 	                     formats[format_idx],
-	                     usage & (GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK),
-	                     usage & ~(GRALLOC_USAGE_PRIVATE_MASK | GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK),
+	                     usage & (GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK), // 'has_cpu_usage'
+	                     usage & ~(GRALLOC_USAGE_PRIVATE_MASK | GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK), // 'has_hw_usage'
 			     usage & RK_GRALLOC_USAGE_SPECIFY_STRIDE, // 'is_stride_specified'
+			     get_usage_flag_for_stride_alignment(usage),
 	                     &bufDescriptor->pixel_stride,
 	                     &bufDescriptor->size,
 	                     bufDescriptor->plane_info);
@@ -870,7 +921,11 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 			}
 
 			/* 对某些 格式的 rk_video_buffer 的 size 做必要调整. */
-			adjust_rk_video_buffer_size(bufDescriptor);
+			adjust_rk_video_buffer_size(bufDescriptor, &(formats[format_idx] ) );
+		}
+		else if ( is_base_format_used_by_rk_video(base_format) && is_stride_alignment_specified(usage) )
+		{
+			adjust_rk_video_buffer_size(bufDescriptor, &(formats[format_idx] ) );
 		}
 	}
 

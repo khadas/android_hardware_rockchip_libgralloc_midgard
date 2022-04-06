@@ -611,18 +611,31 @@ Error validateBufferSize(void* buffer,
 	{
 		for (int i = 0; i < formats[format_idx].npln; i++)
 		{
-			if (gralloc_buffer->plane_info[i].offset != grallocDescriptor.plane_info[i].offset)
+			/* 若 "src_buffer 的 usage 中的 rk_usage_flags_for_stride_alignment"
+			 *	和 "'grallocDescriptor' 的 usage 中的" 不同,
+			 *		则 "不" 检查 plane 的 byte_stride 和 offset, 因为 显然 会有不等的情况.
+			 *		否则, 可检查.
+			 */
+			if ( get_usage_flag_for_stride_alignment(gralloc_buffer->producer_usage | gralloc_buffer->consumer_usage)
+				!= get_usage_flag_for_stride_alignment(grallocDescriptor.producer_usage
+									| grallocDescriptor.consumer_usage) )
 			{
-				MALI_GRALLOC_LOGE("Buffer offset 0x%x mismatch with desc offset 0x%x in plane %d ",
-				      gralloc_buffer->plane_info[i].offset, grallocDescriptor.plane_info[i].offset, i);
-				return Error::BAD_VALUE;
 			}
-
-			if (gralloc_buffer->plane_info[i].byte_stride != grallocDescriptor.plane_info[i].byte_stride)
+			else
 			{
-				MALI_GRALLOC_LOGE("Buffer byte stride 0x%x mismatch with desc byte stride 0x%x in plane %d ",
-				      gralloc_buffer->plane_info[i].byte_stride, grallocDescriptor.plane_info[i].byte_stride, i);
-				return Error::BAD_VALUE;
+				if (gralloc_buffer->plane_info[i].offset != grallocDescriptor.plane_info[i].offset)
+				{
+					MALI_GRALLOC_LOGE("Buffer offset 0x%x mismatch with desc offset 0x%x in plane %d ",
+					      gralloc_buffer->plane_info[i].offset, grallocDescriptor.plane_info[i].offset, i);
+					return Error::BAD_VALUE;
+				}
+
+				if (gralloc_buffer->plane_info[i].byte_stride != grallocDescriptor.plane_info[i].byte_stride)
+				{
+					MALI_GRALLOC_LOGE("Buffer byte stride 0x%x mismatch with desc byte stride 0x%x in plane %d ",
+					      gralloc_buffer->plane_info[i].byte_stride, grallocDescriptor.plane_info[i].byte_stride, i);
+					return Error::BAD_VALUE;
+				}
 			}
 
 			if (gralloc_buffer->plane_info[i].alloc_width != grallocDescriptor.plane_info[i].alloc_width)

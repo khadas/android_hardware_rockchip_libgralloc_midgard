@@ -22,6 +22,7 @@
 #include "mali_gralloc_private_interface_types.h"
 #include "mali_gralloc_buffer.h"
 #include "core/mali_gralloc_bufferdescriptor.h"
+#include "mali_gralloc_usages.h"
 
 /* Compression scheme */
 enum class AllocBaseType
@@ -113,4 +114,16 @@ bool get_alloc_type(const uint64_t format_ext,
                     const uint64_t usage,
                     alloc_type_t * const alloc_type);
 
+static inline uint64_t get_usage_flag_for_stride_alignment(uint64_t usage)
+{
+	return (usage & (RK_GRALLOC_USAGE_STRIDE_ALIGN_16
+				| RK_GRALLOC_USAGE_STRIDE_ALIGN_64
+				| RK_GRALLOC_USAGE_STRIDE_ALIGN_128
+				| RK_GRALLOC_USAGE_STRIDE_ALIGN_256_ODD_TIMES) );
+}
+
+static inline bool is_stride_alignment_specified(uint64_t usage)
+{
+	return ( get_usage_flag_for_stride_alignment(usage) != 0 );
+}
 #endif /* MALI_GRALLOC_BUFFERALLOCATION_H_ */
