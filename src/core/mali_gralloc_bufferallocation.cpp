@@ -826,6 +826,12 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 		return -EINVAL;
 	}
 
+	if (bufDescriptor->alloc_format == HAL_PIXEL_FORMAT_RGBA_1010102)
+	{
+		ALOGE("ERROR: Midgard can not support HAL_PIXEL_FORMAT_RGBA_1010102");
+		return -EINVAL;
+	}
+
 	if (bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_UNDEFINED)
 	{
 		MALI_GRALLOC_LOGE("ERROR: Unrecognized and/or unsupported format 0x%" PRIx64 " and usage 0x%" PRIx64,
