@@ -30,7 +30,6 @@ arm_gralloc_cc_defaults_midgard {
 	vendor: true,
 	proprietary: true,
 	cflags: [
-		"-ldl",
 		"-Wundef",
 		"-Werror",
 		"-DGRALLOC_LIBRARY_BUILD=1",
