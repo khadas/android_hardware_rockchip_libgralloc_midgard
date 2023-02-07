@@ -20,7 +20,7 @@
 
 #include "mali_gralloc_private_interface_types.h"
 #include "mali_gralloc_buffer.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "allocator/mali_gralloc_shared_memory.h"
 #include "gralloc_buffer_priv.h"
 #include "mali_gralloc_bufferallocation.h"
@@ -57,9 +57,9 @@ int mali_gralloc_reference_retain(buffer_handle_t handle)
 	{
 		retval = 0;
 	}
-	else if (hnd->flags & (private_handle_t::PRIV_FLAGS_USES_ION))
+	else if (hnd->flags & (private_handle_t::PRIV_FLAGS_USES_DBH))
 	{
-		retval = mali_gralloc_ion_map(hnd);
+		retval = allocator_map(hnd);
 	}
 	else
 	{
@@ -115,9 +115,9 @@ int mali_gralloc_reference_release(buffer_handle_t handle, bool canFree)
 		if (hnd->ref_count == 0)
 		{
 
-			if (hnd->flags & (private_handle_t::PRIV_FLAGS_USES_ION))
+			if (hnd->flags & (private_handle_t::PRIV_FLAGS_USES_DBH))
 			{
-				mali_gralloc_ion_unmap(hnd);
+				allocator_unmap(hnd);
 			}
 			else
 			{

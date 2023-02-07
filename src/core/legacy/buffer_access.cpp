@@ -24,7 +24,7 @@
 #include "mali_gralloc_buffer.h"
 #include "mali_gralloc_formats.h"
 #include "mali_gralloc_usages.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "gralloc_helper.h"
 
 namespace legacy
@@ -64,14 +64,14 @@ static enum tx_direction get_tx_direction(const uint64_t usage)
 static void buffer_sync(private_handle_t * const hnd,
                         const enum tx_direction direction)
 {
-	if (hnd->flags & private_handle_t::PRIV_FLAGS_USES_ION)
+	if (hnd->flags & private_handle_t::PRIV_FLAGS_USES_DBH)
 	{
 		if (direction != TX_NONE)
 		{
 			hnd->cpu_read = (direction == TX_FROM_DEVICE || direction == TX_BOTH) ? 1 : 0;
 			hnd->cpu_write = (direction == TX_TO_DEVICE || direction == TX_BOTH) ? 1 : 0;
 
-			const int status = mali_gralloc_ion_sync_start(hnd,
+			const int status = allocator_sync_start(hnd,
 			                                               hnd->cpu_read ? true : false,
 			                                               hnd->cpu_write ? true : false);
 			if (status < 0)
@@ -81,7 +81,7 @@ static void buffer_sync(private_handle_t * const hnd,
 		}
 		else if (hnd->cpu_read || hnd->cpu_write)
 		{
-			const int status = mali_gralloc_ion_sync_end(hnd,
+			const int status = allocator_sync_end(hnd,
 			                                             hnd->cpu_read ? true : false,
 			                                             hnd->cpu_write ? true : false);
 			if (status < 0)

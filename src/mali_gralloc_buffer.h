@@ -136,7 +136,9 @@ struct private_handle_t
 		PRIV_FLAGS_FRAMEBUFFER = 0x00000001,
 		PRIV_FLAGS_USES_ION_COMPOUND_HEAP = 0x00000002,
 		PRIV_FLAGS_USES_ION = 0x00000004,
-		PRIV_FLAGS_USES_ION_DMA_HEAP = 0x00000008
+		PRIV_FLAGS_USES_ION_DMA_HEAP = 0x00000008,
+                /* allocated from dmabuf_heaps. */
+                PRIV_FLAGS_USES_DBH = 1 << 6,
 	};
 
 	enum

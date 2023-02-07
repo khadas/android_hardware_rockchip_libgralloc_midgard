@@ -28,7 +28,7 @@
 #include <hardware/gralloc1.h>
 
 #include "mali_gralloc_bufferallocation.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "allocator/mali_gralloc_shared_memory.h"
 #include "mali_gralloc_private_interface_types.h"
 #include "mali_gralloc_buffer.h"
@@ -1135,7 +1135,7 @@ int mali_gralloc_buffer_allocate(const gralloc_buffer_descriptor_t *descriptors,
 	}
 
 	/* Allocate ION backing store memory */
-	err = mali_gralloc_ion_allocate(descriptors, numDescriptors, pHandle, &shared);
+	err = allocator_allocate(descriptors, numDescriptors, pHandle, &shared);
 	if (err < 0)
 	{
 		return err;
@@ -1184,7 +1184,7 @@ int mali_gralloc_buffer_free(buffer_handle_t pHandle)
 		return -1;
 	}
 
-	mali_gralloc_ion_free(hnd);
+	allocator_free(hnd);
 	gralloc_shared_memory_free(hnd->share_attr_fd, hnd->attr_base, hnd->attr_size);
 	hnd->share_fd = hnd->share_attr_fd = -1;
 	hnd->base = hnd->attr_base = MAP_FAILED;

@@ -17,7 +17,7 @@
 #include "GrallocAllocator.h"
 #include "hidl_common/BufferDescriptor.h"
 #include "hidl_common/Allocator.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 
 namespace arm
 {
@@ -37,7 +37,7 @@ GrallocAllocator::GrallocAllocator()
 
 GrallocAllocator::~GrallocAllocator()
 {
-	mali_gralloc_ion_close();
+	allocator_close();
 }
 
 Return<void> GrallocAllocator::allocate(const BufferDescriptor &descriptor, uint32_t count, allocate_cb hidl_cb)
