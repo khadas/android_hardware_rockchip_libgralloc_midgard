@@ -256,15 +256,20 @@ void get_smpte2094_40(const private_handle_t *hnd, std::optional<std::vector<uin
 
 android::status_t set_smpte2094_40(const private_handle_t *hnd, const std::optional<std::vector<uint8_t>> &smpte2094_40)
 {
-	if (!smpte2094_40.has_value() || smpte2094_40->size() == 0)
+	auto *metadata = reinterpret_cast<shared_metadata *>(hnd->attr_base);
+	if (!smpte2094_40.has_value())
 	{
-		MALI_GRALLOC_LOGE("Empty SMPTE 2094-40 data");
-		return android::BAD_VALUE;
+		metadata->smpte2094_40.size = 0;
+		return android::OK;
 	}
 
-	auto *metadata = reinterpret_cast<shared_metadata *>(hnd->attr_base);
-	const size_t size = smpte2094_40.has_value() ? smpte2094_40->size() : 0;
-	if (size > metadata->smpte2094_40.capacity())
+	const size_t size = smpte2094_40->size();
+	if (size == 0)
+	{
+		MALI_GRALLOC_LOGE("SMPTE 2094-40 vector is empty");
+		return android::BAD_VALUE;
+	}
+	else if (size > metadata->smpte2094_40.capacity())
 	{
 		MALI_GRALLOC_LOGE("SMPTE 2094-40 metadata too large to fit in shared metadata region");
 		return android::BAD_VALUE;
