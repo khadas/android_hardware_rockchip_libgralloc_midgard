@@ -23,7 +23,7 @@
 #include <hardware/gralloc1.h>
 
 #include "mali_gralloc_bufferallocation.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "mali_gralloc_private_interface_types.h"
 #include "mali_gralloc_buffer.h"
 #include "gralloc_buffer_priv.h"

@@ -19,7 +19,7 @@
 #include "hidl_common/BufferDescriptor.h"
 #include "hidl_common/MapperMetadata.h"
 
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 
 namespace arm
 {
@@ -41,7 +41,7 @@ GrallocMapper::GrallocMapper()
 
 GrallocMapper::~GrallocMapper()
 {
-	mali_gralloc_ion_close();
+	allocator_close();
 }
 
 Return<void> GrallocMapper::createDescriptor(const BufferDescriptorInfo &descriptorInfo, createDescriptor_cb hidl_cb)

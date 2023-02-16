@@ -34,7 +34,7 @@ arm_gralloc_allocator_cc_defaults_midgard {
                 "-DGRALLOC_USE_ION_DMABUF_SYNC=1",
         ],
 	srcs: [
-		"mali_gralloc_ion.cpp",
+		"mali_gralloc_dmabufheap.cpp",
 		"mali_gralloc_shared_memory.cpp",
 	],
 	static_libs: [
@@ -44,12 +44,13 @@ arm_gralloc_allocator_cc_defaults_midgard {
 		"libhardware",
 		"liblog",
 		"libcutils",
-		"libion",
+                "libdmabufheap",
 		"libsync",
 		"libutils",
 		"libnativewindow",
 	],
 	header_libs: [
+                "libsystem_headers",
 		"libnativebase_headers",
 	],
 }

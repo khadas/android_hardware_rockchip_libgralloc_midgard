@@ -35,7 +35,7 @@
 #include "core/mali_gralloc_bufferallocation.h"
 #include "core/mali_gralloc_bufferdescriptor.h"
 #include "core/format_info.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "allocator/mali_gralloc_shared_memory.h"
 #include "gralloc_priv.h"
 

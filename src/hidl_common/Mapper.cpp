@@ -27,7 +27,7 @@
 #include "core/mali_gralloc_bufferaccess.h"
 #include "core/mali_gralloc_reference.h"
 #include "core/format_info.h"
-#include "allocator/mali_gralloc_ion.h"
+#include "allocator/allocator.h"
 #include "mali_gralloc_buffer.h"
 #include "mali_gralloc_log.h"
 #include "gralloc_buffer_priv.h"
@@ -744,7 +744,7 @@ void flushLockedBuffer(void *buffer, IMapper::flushLockedBuffer_cb hidl_cb)
 		return;
 	}
 
-	mali_gralloc_ion_sync_end(private_handle, false, true);
+	allocator_sync_end(private_handle, false, true);
 	hidl_cb(Error::NONE, hidl_handle{});
 }
 
@@ -764,7 +764,7 @@ Error rereadLockedBuffer(void *buffer)
 		return Error::BAD_BUFFER;
 	}
 
-	mali_gralloc_ion_sync_start(private_handle, true, false);
+	allocator_sync_start(private_handle, true, false);
 	return Error::NONE;
 }
 
