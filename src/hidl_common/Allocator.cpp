@@ -45,99 +45,65 @@ namespace allocator
 {
 namespace common
 {
-
-void allocate(const buffer_descriptor_t &bufferDescriptor, uint32_t count, IAllocator::allocate_cb hidl_cb,
-              std::function<int(const buffer_descriptor_t *, buffer_handle_t *)> fb_allocator)
+android::base::expected<std::vector<unique_private_handle>, android::status_t> allocate(
+    buffer_descriptor_t *buffer_descriptor, uint32_t count)
 {
-#if DISABLE_FRAMEBUFFER_HAL
-	GRALLOC_UNUSED(fb_allocator);
-#endif
-
-	Error error = Error::NONE;
 	int stride = 0;
-	std::vector<hidl_handle> grallocBuffers;
-	gralloc_buffer_descriptor_t grallocBufferDescriptor[1];
+        std::vector<unique_private_handle> gralloc_buffers;
 
-	grallocBufferDescriptor[0] = (gralloc_buffer_descriptor_t)(&bufferDescriptor);
-	grallocBuffers.reserve(count);
+        gralloc_buffers.reserve(count);
 
 	for (uint32_t i = 0; i < count; i++)
 	{
-		buffer_handle_t tmpBuffer = nullptr;
-
-		int allocResult;
-#if (DISABLE_FRAMEBUFFER_HAL != 1)
-		if (((bufferDescriptor.producer_usage & GRALLOC_USAGE_HW_FB) ||
-		     (bufferDescriptor.consumer_usage & GRALLOC_USAGE_HW_FB)) &&
-		    fb_allocator)
+		auto hnd = mali_gralloc_buffer_allocate(buffer_descriptor);
+		if (hnd == nullptr)
 		{
-			allocResult = fb_allocator(&bufferDescriptor, &tmpBuffer);
+			MALI_GRALLOC_LOGE("buffer allocation failed: %s", strerror(errno));
+			return android::base::unexpected{ android::NO_MEMORY };
 		}
-		else
-#endif
+		
+		hnd->imapper_version = HIDL_MAPPER_VERSION_SCALED;
+
+		hnd->reserved_region_size = buffer_descriptor->reserved_size;
+		hnd->attr_size = mapper::common::shared_metadata_size() + hnd->reserved_region_size;
+		std::tie(hnd->share_attr_fd, hnd->attr_base) =
+		    gralloc_shared_memory_allocate("gralloc_shared_memory", hnd->attr_size);
+		if (hnd->share_attr_fd < 0 || hnd->attr_base == MAP_FAILED)
 		{
-			allocResult = mali_gralloc_buffer_allocate(grallocBufferDescriptor, 1, &tmpBuffer, nullptr);
-			if (allocResult != 0)
-			{
-				MALI_GRALLOC_LOGE("%s, buffer allocation failed with %d", __func__, allocResult);
-				error = Error::NO_RESOURCES;
-				break;
-			}
-			auto hnd = const_cast<private_handle_t *>(reinterpret_cast<const private_handle_t *>(tmpBuffer));
-			hnd->imapper_version = HIDL_MAPPER_VERSION_SCALED;
+			MALI_GRALLOC_LOGE("%s, shared memory allocation failed with errno %d", __func__, errno);
+			return android::base::unexpected{ android::BAD_VALUE };
+		}
 
-#if GRALLOC_USE_SHARED_METADATA
-			hnd->reserved_region_size = bufferDescriptor.reserved_size;
-			hnd->attr_size = mapper::common::shared_metadata_size() + hnd->reserved_region_size;
-#else
-			hnd->attr_size = sizeof(attr_region);
-#endif
-			std::tie(hnd->share_attr_fd, hnd->attr_base) =
-			    gralloc_shared_memory_allocate("gralloc_shared_memory", hnd->attr_size);
-			if (hnd->share_attr_fd < 0 || hnd->attr_base == MAP_FAILED)
-			{
-				MALI_GRALLOC_LOGE("%s, shared memory allocation failed with errno %d", __func__, errno);
-				mali_gralloc_buffer_free(tmpBuffer);
-				error = Error::UNSUPPORTED;
-				break;
-			}
+		const uint32_t base_format = buffer_descriptor->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
+		const uint64_t usage = buffer_descriptor->consumer_usage | buffer_descriptor->producer_usage;
+		android_dataspace_t dataspace;
+		get_format_dataspace(base_format, usage, hnd->width, hnd->height, &dataspace,
+				     &hnd->yuv_info);
+		mapper::common::shared_metadata_init(hnd->attr_base,
+						     buffer_descriptor->name,
+						     static_cast<mapper::common::Dataspace>(dataspace) );
 
-#if GRALLOC_USE_SHARED_METADATA
-			mapper::common::shared_metadata_init(hnd->attr_base, bufferDescriptor.name);
-#else
-			new(hnd->attr_base) attr_region;
-#endif
-			const uint32_t base_format = bufferDescriptor.alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
-			const uint64_t usage = bufferDescriptor.consumer_usage | bufferDescriptor.producer_usage;
-			android_dataspace_t dataspace;
-			get_format_dataspace(base_format, usage, hnd->width, hnd->height, &dataspace,
-			                     &hnd->yuv_info);
+		/*
+		 * We need to set attr_base to MAP_FAILED before the HIDL callback
+		 * to avoid sending an invalid pointer to the client process.
+		 *
+		 * hnd->attr_base = mmap(...);
+		 * hidl_callback(hnd); // client receives hnd->attr_base = <dangling pointer>
+		 */
+		munmap(hnd->attr_base, hnd->attr_size);
+		hnd->attr_base = MAP_FAILED;
 
-#if GRALLOC_USE_SHARED_METADATA
-			mapper::common::set_dataspace(hnd, static_cast<mapper::common::Dataspace>(dataspace));
-#else
-			int temp_dataspace = static_cast<int>(dataspace);
-			gralloc_buffer_attr_write(hnd, GRALLOC_ARM_BUFFER_ATTR_DATASPACE, &temp_dataspace);
-#endif
-			/*
-			 * We need to set attr_base to MAP_FAILED before the HIDL callback
-			 * to avoid sending an invalid pointer to the client process.
-			 *
-			 * hnd->attr_base = mmap(...);
-			 * hidl_callback(hnd); // client receives hnd->attr_base = <dangling pointer>
-			 */
-			munmap(hnd->attr_base, hnd->attr_size);
-			hnd->attr_base = MAP_FAILED;
 
-			buffer_descriptor_t * const bufDescriptor = (buffer_descriptor_t *)(grallocBufferDescriptor[0]);
-			D("got new private_handle_t instance @%p for buffer '%s'. share_fd : %d, share_attr_fd : %d, "
+		{
+			buffer_descriptor_t* bufDescriptor = buffer_descriptor;
+			D("got new private_handle_t instance for buffer '%s'. share_fd : %d, share_attr_fd : %d, "
 				"flags : 0x%x, width : %d, height : %d, "
 				"req_format : 0x%x, producer_usage : 0x%" PRIx64 ", consumer_usage : 0x%" PRIx64 ", "
 				"internal_format : 0x%" PRIx64 ", stride : %d, byte_stride : %d, "
 				"internalWidth : %d, internalHeight : %d, "
 				"alloc_format : 0x%" PRIx64 ", size : %d, layer_count : %u, backing_store_size : %d, "
 				"allocating_pid : %d, ref_count : %d, yuv_info : %d",
-				hnd, (bufDescriptor->name).c_str() == nullptr ? "unset" : (bufDescriptor->name).c_str(),
+				(bufDescriptor->name).c_str() == nullptr ? "unset" : (bufDescriptor->name).c_str(),
 			  hnd->share_fd, hnd->share_attr_fd,
 			  hnd->flags, hnd->width, hnd->height,
 			  hnd->req_format, hnd->producer_usage, hnd->consumer_usage,
@@ -157,17 +123,7 @@ void allocate(const buffer_descriptor_t &bufferDescriptor, uint32_t count, IAllo
 					(hnd->plane_info)[1].alloc_height);
 		}
 
-		int tmpStride = 0;
-		if (GRALLOC_USE_LEGACY_CALCS)
-		{
-			const private_handle_t *hnd = static_cast<const private_handle_t *>(tmpBuffer);
-			tmpStride = hnd->stride;
-		}
-		else
-		{
-			tmpStride = bufferDescriptor.pixel_stride;
-		}
-
+		int tmpStride = buffer_descriptor->pixel_stride;
 		if (stride == 0)
 		{
 			stride = tmpStride;
@@ -175,31 +131,14 @@ void allocate(const buffer_descriptor_t &bufferDescriptor, uint32_t count, IAllo
 		else if (stride != tmpStride)
 		{
 			/* Stride must be the same for all allocations */
-			mali_gralloc_buffer_free(tmpBuffer);
 			stride = 0;
-			error = Error::UNSUPPORTED;
-			break;
+			return android::base::unexpected{ android::BAD_VALUE };
 		}
 
-		grallocBuffers.emplace_back(hidl_handle(tmpBuffer));
+                gralloc_buffers.push_back(std::move(hnd));
 	}
 
-	/* Populate the array of buffers for application consumption */
-	hidl_vec<hidl_handle> hidlBuffers;
-	if (error == Error::NONE)
-	{
-		hidlBuffers.setToExternal(grallocBuffers.data(), grallocBuffers.size());
-	}
-	hidl_cb(error, stride, hidlBuffers);
-
-	/* The application should import the Gralloc buffers using IMapper for
-	 * further usage. Free the allocated buffers in IAllocator context
-	 */
-	for (const auto &buffer : grallocBuffers)
-	{
-		mali_gralloc_buffer_free(buffer.getNativeHandle());
-		native_handle_delete(const_cast<native_handle_t *>(buffer.getNativeHandle()));
-	}
+        return gralloc_buffers;
 }
 
 } // namespace common

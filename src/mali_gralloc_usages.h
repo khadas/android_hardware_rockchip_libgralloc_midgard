@@ -27,6 +27,10 @@
 #error "GRALLOC_VERSION_MAJOR must be defined."
 #endif
 
+#if GRALLOC_ALLOCATOR_AIDL_VERSION > 0
+#include <aidl/android/hardware/graphics/common/BufferUsage.h>
+#endif
+
 #define GRALLOC_USAGE_PRIVATE_MASK (0xffff0000f0000000U)
 
 /*
@@ -276,6 +280,14 @@ typedef enum
 #define GRALLOC_USAGE_GPU_DATA_BUFFER static_cast<uint64_t>(hidl_common::BufferUsage::GPU_DATA_BUFFER)
 
 #endif
+
+/* This usage should be used when using the AIDL allocator, otherwise use MALI_GRALLOC_USAGE_FRONTBUFFER */
+#define GRALLOC_USAGE_FRONTBUFFER static_cast<uint64_t>(1ULL << 32)
+
+#if GRALLOC_ALLOCATOR_AIDL_VERSION > 0
+static_assert(GRALLOC_USAGE_FRONTBUFFER ==
+              static_cast<uint64_t>(aidl::android::hardware::graphics::common::BufferUsage::FRONT_BUFFER));
+#endif /* GRALLOC_ALLOCATOR_AIDL_VERSION > 0 */
 
 /* Originally (Gralloc 0.x), Android did not provide an explicit DECODER usage. This was rectified in Android N-MR1/7.1
  * when Gralloc 1.0 defined GRALLOC1_PRODUCER_USAGE_VIDEO_DECODER. However, libstagefright continues

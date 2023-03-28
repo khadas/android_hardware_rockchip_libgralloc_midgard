@@ -21,23 +21,14 @@
 #include "core/mali_gralloc_bufferdescriptor.h"
 
 /*
- * Creates a new private_handle_t, allocates graphics memory to back it, and maps
- * the graphics memory into the process address space (excluding protected memory).
+ * Creates a new private_handle_t with graphics memory to back it.
  *
- * The output must be destroyed by calling allocator_free, followed by
- * native_handle_close, and finally native_handle_delete.
+ * @param descriptor     [in]    Request descriptor
  *
- * @param descriptors     [in]    Buffer request descriptors
- * @param numDescriptors  [in]    Number of descriptors
- * @param pHandle         [out]   Handle for each allocated buffer
- * @param shared_backend  [out]   Shared buffers flag
- *
- * @return 0, on success; -errno, otherwise.
+ * @return nullptr upon failure
  */
-int allocator_allocate (const gralloc_buffer_descriptor_t *descriptors,
-			uint32_t numDescriptors,
-			buffer_handle_t *pHandle,
-			bool *alloc_from_backing_store);
+unique_private_handle allocator_allocate(const buffer_descriptor_t *descriptor);
+
 void allocator_free(private_handle_t * const hnd);
 
 /*

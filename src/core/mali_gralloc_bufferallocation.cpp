@@ -620,7 +620,7 @@ static void calc_allocation_size(const int width,
 					break;
 
 				default:
-					E("unexpected 'usage_flag_for_stride_alignment': 0x%" PRIx64,
+					MY_E("unexpected 'usage_flag_for_stride_alignment': 0x%" PRIx64,
 					  usage_flag_for_stride_alignment);
 					break;
 				}
@@ -1114,64 +1114,25 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 	return 0;
 }
 
-
-int mali_gralloc_buffer_allocate(const gralloc_buffer_descriptor_t *descriptors,
-                                 uint32_t numDescriptors, buffer_handle_t *pHandle, bool *shared_backend)
+unique_private_handle mali_gralloc_buffer_allocate(buffer_descriptor_t *descriptor)
 {
-	bool shared = false;
-	uint64_t backing_store_id = 0x0;
-	int err;
-
-	for (uint32_t i = 0; i < numDescriptors; i++)
+	int err = mali_gralloc_derive_format_and_size(descriptor);
+	if (err != 0)
 	{
-		buffer_descriptor_t * const bufDescriptor = (buffer_descriptor_t *)(descriptors[i]);
-
-		/* Derive the buffer size from descriptor parameters */
-		err = mali_gralloc_derive_format_and_size(bufDescriptor);
-		if (err != 0)
-		{
-			return err;
-		}
+		MALI_GRALLOC_LOGE("buffer allocation failed: %s", strerror(-err));
+		return nullptr;
 	}
 
-	/* Allocate ION backing store memory */
-	err = allocator_allocate(descriptors, numDescriptors, pHandle, &shared);
-	if (err < 0)
+	auto handle = allocator_allocate(descriptor);
+	if (handle == nullptr)
 	{
-		return err;
+		MALI_GRALLOC_LOGE("buffer allocation failed: %s", strerror(ENOMEM));
+		return nullptr;
 	}
 
-	if (shared)
-	{
-		backing_store_id = getUniqueId();
-	}
+	handle->backing_store_id = getUniqueId();
 
-	for (uint32_t i = 0; i < numDescriptors; i++)
-	{
-		buffer_descriptor_t * const bufDescriptor = (buffer_descriptor_t *)descriptors[i];
-		private_handle_t *hnd = (private_handle_t *)pHandle[i];
-		uint64_t usage = bufDescriptor->consumer_usage | bufDescriptor->producer_usage;
-
-		mali_gralloc_dump_buffer_add(hnd);
-
-		if (shared)
-		{
-			/*each buffer will share the same backing store id.*/
-			hnd->backing_store_id = backing_store_id;
-		}
-		else
-		{
-			/* each buffer will have an unique backing store id.*/
-			hnd->backing_store_id = getUniqueId();
-		}
-	}
-
-	if (NULL != shared_backend)
-	{
-		*shared_backend = shared;
-	}
-
-	return 0;
+	return handle;
 }
 
 int mali_gralloc_buffer_free(buffer_handle_t pHandle)

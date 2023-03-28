@@ -21,6 +21,7 @@ cc_defaults {
 		android: {
 			shared_libs: [
 				"android.hardware.graphics.common@1.2",
+                                "android.hardware.graphics.common-V3-ndk",
 			],
 		},
 	},
@@ -30,6 +31,7 @@ cc_defaults {
 		"-DHIDL_ALLOCATOR_VERSION_SCALED=400",
 		"-DHIDL_MAPPER_VERSION_SCALED=400",
 		"-DHIDL_COMMON_VERSION_SCALED=120",
+		"-DGRALLOC_ALLOCATOR_AIDL_VERSION=1",
 	],
 }
 
@@ -64,22 +66,6 @@ cc_defaults {
 	],
 	export_shared_lib_headers: [
 		"libhidlbase",
-	],
-}
-
-cc_library_shared {
-	name: "android.hardware.graphics.allocator@4.0-impl-midgard",
-	defaults: [
-		"arm_gralloc_api_4x_defaults_midgard",
-	],
-	shared_libs: [
-		"android.hardware.graphics.allocator@4.0",
-		"android.hardware.graphics.mapper@4.0",
-	],
-	srcs: [
-		"GrallocAllocator.cpp",
-		":libgralloc_hidl_common_allocator_midgard",
-		":libgralloc_hidl_common_shared_metadata_midgard",
 	],
 }
 

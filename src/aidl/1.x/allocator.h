@@ -1,6 +1,5 @@
-
 /*
- * Copyright (C) 2020 Arm Limited.
+ * Copyright (C) 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,18 +15,18 @@
  * limitations under the License.
  */
 
-cc_library_headers {
-	name: "libgralloc_headers_midgard",
-	vendor: true,
-	host_supported: true,
-	export_include_dirs: [
-		".",
-	],
-	header_libs: [
-		"libsystem_headers",
-                "libbase_headers",
-	],
-	export_header_lib_headers: [
-		"libsystem_headers",
-	],
-}
+#include <aidl/android/hardware/graphics/allocator/BnAllocator.h>
+
+#pragma once
+
+namespace aidl::android::hardware::graphics::allocator::impl::arm
+{
+
+class allocator : public BnAllocator
+{
+public:
+	ndk::ScopedAStatus allocate(const std::vector<uint8_t> &in_descriptor, int32_t in_count,
+	                            AllocationResult *out_result) override;
+};
+
+} // namespace aidl::android::hardware::graphics::allocator::impl::arm

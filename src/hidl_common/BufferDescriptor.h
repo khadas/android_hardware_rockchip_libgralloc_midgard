@@ -34,6 +34,10 @@
 #include <inttypes.h>
 #include <string.h>
 
+#if GRALLOC_ALLOCATOR_AIDL_VERSION > 0
+#include <aidl/android/hardware/graphics/common/BufferUsage.h>
+#endif
+
 namespace arm {
 namespace mapper {
 namespace common {
@@ -58,9 +62,15 @@ const uint64_t validUsageBits =
 		BufferUsage::RENDERSCRIPT |
 		BufferUsage::VIDEO_DECODER |
 		BufferUsage::SENSOR_DIRECT_DATA |
-		BufferUsage::GPU_DATA_BUFFER |
-		BufferUsage::VENDOR_MASK |
-		BufferUsage::VENDOR_MASK_HI;
+#if GRALLOC_ALLOCATOR_AIDL_VERSION > 0
+    static_cast<uint64_t>(aidl::android::hardware::graphics::common::BufferUsage::FRONT_BUFFER) |
+#endif
+		BufferUsage::GPU_DATA_BUFFER | BufferUsage::VENDOR_MASK | BufferUsage::VENDOR_MASK_HI;
+
+const uint32_t DESCRIPTOR_ALLOCATOR_FLAGS =
+    ((GRALLOC_ALLOCATOR_AIDL_VERSION > 0)
+    ? GPU_DATA_BUFFER_WITH_ANY_FORMAT | USE_AIDL_FRONTBUFFER_USAGE | SUPPORTS_R8
+    : 0);
 
 template<typename BufferDescriptorInfoT>
 static bool validateDescriptorInfo(const BufferDescriptorInfoT &descriptorInfo)

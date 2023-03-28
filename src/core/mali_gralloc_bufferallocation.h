@@ -100,8 +100,7 @@ using alloc_type_t = AllocType;
 
 int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescriptor);
 
-int mali_gralloc_buffer_allocate(const gralloc_buffer_descriptor_t *descriptors,
-                                 uint32_t numDescriptors, buffer_handle_t *pHandle, bool *shared_backend);
+unique_private_handle mali_gralloc_buffer_allocate(buffer_descriptor_t *descriptor);
 
 int mali_gralloc_buffer_free(buffer_handle_t pHandle);
 

@@ -38,7 +38,6 @@ enum tx_direction
 	TX_BOTH,
 };
 
-
 static enum tx_direction get_tx_direction(const uint64_t usage)
 {
 	const bool read = (usage & GRALLOC_USAGE_SW_READ_MASK) ? true : false;

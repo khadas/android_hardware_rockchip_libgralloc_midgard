@@ -47,7 +47,7 @@ using aidl::android::hardware::graphics::common::Cta861_3;
 using aidl::android::hardware::graphics::common::BlendMode;
 using aidl::android::hardware::graphics::common::Dataspace;
 
-void shared_metadata_init(void *memory, std::string_view name);
+void shared_metadata_init(void *memory, std::string_view name, Dataspace dataspace);
 size_t shared_metadata_size();
 
 void get_name(const private_handle_t *hnd, std::string *name);

@@ -25,6 +25,14 @@
 
 typedef uint64_t gralloc_buffer_descriptor_t;
 
+/* Flags to describe additional buffer descriptor information */
+enum buffer_descriptor_flags : uint32_t
+{
+        GPU_DATA_BUFFER_WITH_ANY_FORMAT = 1,
+        USE_AIDL_FRONTBUFFER_USAGE = 1 << 1,
+        SUPPORTS_R8 = 1 << 2,
+};
+
 /* A buffer_descriptor contains the requested parameters for the buffer
  * as well as the calculated parameters that are passed to the allocator.
  */
@@ -80,6 +88,8 @@ struct buffer_descriptor_t
 	{
 		memset(plane_info, 0, sizeof(plane_info_t) * MAX_PLANES);
 	}
+
+	std::underlying_type_t<buffer_descriptor_flags> flags{};
 };
 
 #endif /* MALI_GRALLOC_BUFFERDESCRIPTOR_H_ */

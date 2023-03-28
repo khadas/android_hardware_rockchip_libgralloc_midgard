@@ -18,8 +18,15 @@
 #ifndef MALI_GRALLOC_BUFFER_H_
 #define MALI_GRALLOC_BUFFER_H_
 
+#include <array>
+#include <atomic>
+#include <cerrno>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <new>
+
 #include <stdint.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -29,6 +36,7 @@
 
 #ifdef __cplusplus
 #include <new>
+#include <android-base/unique_fd.h>
 #endif
 
 #include "mali_gralloc_log.h"
@@ -364,12 +372,40 @@ struct private_handle_t
 #pragma GCC diagnostic pop
 #endif
 
+struct native_handle_deleter
+{
+	void operator()(native_handle_t *native_handle)
+	{
+		native_handle_close(native_handle);
+		native_handle_delete(native_handle);
+	}
+};
+
+template <typename T>
+using unique_handle = std::unique_ptr<T, native_handle_deleter>;
+
+using unique_private_handle = unique_handle<private_handle_t>;
+
 #ifdef __cplusplus
-static inline private_handle_t *make_private_handle(
-    int flags, int size, uint64_t consumer_usage, uint64_t producer_usage,
-    int shared_fd, int required_format, uint64_t internal_format, uint64_t allocated_format,
-    int width, int height, int stride, int internal_width, int internal_height, int byte_stride,
-    int backing_store_size, uint64_t layer_count, plane_info_t *plane_info)
+static inline unique_private_handle make_private_handle(
+			int flags, // 
+			int size,
+			uint64_t consumer_usage,
+			uint64_t producer_usage,
+			android::base::unique_fd shared_fd,
+			int required_format,	// 'hal_format'
+			uint64_t internal_format, // 
+			uint64_t allocated_format,
+			int width,
+			int height,
+			int layer_count,
+			const plane_info_t *plane_info,
+			int stride,
+			int internal_width, // 
+			int internal_height, // 
+			int byte_stride, // 
+			int backing_store_size // 
+			)
 {
 	void *mem = native_handle_create(GRALLOC_ARM_NUM_FDS, NUM_INTS_IN_PRIVATE_HANDLE);
 	if (mem == nullptr)
@@ -378,10 +414,23 @@ static inline private_handle_t *make_private_handle(
 		return nullptr;
 	}
 
-	return new(mem) private_handle_t(flags, size, consumer_usage, producer_usage,
-	                                 shared_fd, required_format, internal_format, allocated_format,
-	                                 width, height, stride, internal_width, internal_height, byte_stride,
-	                                 backing_store_size, layer_count, plane_info);
+	return unique_private_handle{new (mem) private_handle_t(flags,
+								size,
+								consumer_usage,
+								producer_usage,
+								shared_fd.release(), // 'shared_fd'
+								required_format,
+								internal_format,
+	                                                        allocated_format,
+								width,
+								height,
+								stride,
+								internal_width,
+								internal_height,
+								byte_stride,
+								backing_store_size,
+								layer_count,
+								const_cast<plane_info_t *>(plane_info) )};
 }
 #endif
 

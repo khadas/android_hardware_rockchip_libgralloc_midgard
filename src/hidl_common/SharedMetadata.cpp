@@ -137,9 +137,11 @@ static_assert(sizeof(shared_metadata::name) == 260, "bad size");
 static_assert(alignof(shared_metadata) == 4, "bad alignment");
 static_assert(sizeof(shared_metadata) == 2404, "bad size");
 
-void shared_metadata_init(void *memory, std::string_view name)
+void shared_metadata_init(void *memory, std::string_view name, Dataspace dataspace)
 {
+	auto *metadata = new (memory) shared_metadata(name);
 	new(memory) shared_metadata(name);
+	metadata->dataspace = aligned_optional{dataspace};
 }
 
 size_t shared_metadata_size()

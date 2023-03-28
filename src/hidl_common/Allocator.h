@@ -25,10 +25,14 @@
 #endif
 
 #if GRALLOC_VERSION_MAJOR == 4
-#include "4.x/gralloc_allocator_hidl_header.h"
+// #include "4.x/gralloc_allocator_hidl_header.h"
 #endif
 
-#include <functional>
+#include <utility>
+#include <vector>
+
+#include <android-base/expected.h>
+#include <utils/Errors.h>
 
 #include "core/mali_gralloc_bufferdescriptor.h"
 #include "BufferDescriptor.h"
@@ -43,24 +47,16 @@ namespace common
 using android::hardware::hidl_handle;
 using android::hardware::hidl_vec;
 
-/*
+/**             
  * Allocates buffers with the properties specified by the descriptor
- *
- * @param bufferDescriptor: Specifies the properties of the buffers to allocate.
- * @param count: Number of buffers to allocate.
- * @param hidl_cb [in] HIDL callback function generating -
- *        error : NONE upon success. Otherwise,
- *                BAD_DESCRIPTOR when the descriptor is invalid.
- *                NO_RESOURCES when the allocation cannot be fulfilled
- *                UNSUPPORTED when any of the property encoded in the descriptor
- *                            is not supported
- *        stride: Number of pixels between two consecutive rows of the
- *                buffers, when the concept of consecutive rows is defined.
- *        buffers: An array of raw handles to the newly allocated buffers
- * @param fb_allocator [in] function to use for allocation of buffers with GRALLOC_USAGE_HW_FB
- */
-void allocate(const buffer_descriptor_t &bufferDescriptor, uint32_t count, IAllocator::allocate_cb hidl_cb,
-              std::function<int(const buffer_descriptor_t *, buffer_handle_t *)> fb_allocator = nullptr);
+ *              
+ * @param[in, out]  descriptor  Specifies the properties of the buffers to allocate
+ * @param           count       Number of buffers to allocate.
+ *                      
+ * @return Raw handles or error code.
+ */             
+android::base::expected<std::vector<unique_private_handle>, android::status_t>
+allocate(buffer_descriptor_t *descriptor, uint32_t count);
 
 } // namespace common
 } // namespace allocator

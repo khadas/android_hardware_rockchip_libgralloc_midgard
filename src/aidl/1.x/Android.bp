@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Arm Limited.
+ * Copyright (C) 2022 Arm Limited.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,36 +15,31 @@
  * limitations under the License.
  */
 
-cc_library_static {
-    name: "libgralloc_drmutils_midgard",
-    cflags: [
-        "-Wall",
-        "-Werror",
+cc_library_shared {
+    name: "android.hardware.graphics.allocator-V1-midgard",
+    compile_multilib: "both",
+    relative_install_path: "hw/",
+    defaults: [
+        "arm_gralloc_api_4x_defaults_midgard",
     ],
-    srcs: [
-        "src/drmutils.cpp",
-    ],
-    vendor: true,
     shared_libs: [
-        "liblog",
-        "libdrm",
-        "libcutils",
-        "libbase",
+        "android.hardware.graphics.allocator-V1-ndk",
+        "android.hardware.graphics.mapper@4.0",
+        "libbinder_ndk",
+        "libdmabufheap",
     ],
-    header_libs: [
-        "libgralloc_headers_midgard",
-        "libhardware_rockchip_headers",
-    ],
-    include_dirs: [
-        ".",
+    static_libs: [
+        "libaidlcommonsupport",
     ],
     export_include_dirs: [
         ".",
     ],
     export_shared_lib_headers: [
-        "libdrm",
+        "android.hardware.graphics.allocator-V1-ndk",
     ],
-    export_header_lib_headers: [
-        "libgralloc_headers_midgard",
+    srcs: [
+        "allocator.cpp",
+        ":libgralloc_hidl_common_allocator_midgard",
+        ":libgralloc_hidl_common_shared_metadata_midgard",
     ],
 }
