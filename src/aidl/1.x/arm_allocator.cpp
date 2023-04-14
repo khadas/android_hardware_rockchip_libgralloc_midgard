@@ -1,22 +1,5 @@
-// #error
-/*
- * Copyright (C) 2022 Arm Limited.
- * SPDX-License-Identifier: Apache-2.0
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-#include "allocator.h"
+#include "arm_allocator.h"
 #include "hidl_common/BufferDescriptor.h"
 #include "hidl_common/Allocator.h"
 
@@ -24,16 +7,15 @@
 #include <aidlcommonsupport/NativeHandle.h>
 #include <aidl/android/hardware/graphics/allocator/AllocationError.h>
 
+using android::hardware::hidl_vec;
 
-namespace aidl::android::hardware::graphics::allocator::impl::arm
+namespace arm::allocator::aidl
 {
 
-using ::android::hardware::hidl_vec;
-
-ndk::ScopedAStatus allocator::allocate(const std::vector<uint8_t> &in_descriptor, int32_t in_count,
-                                        AllocationResult *out_result)
+ndk::ScopedAStatus MidgardAllocator::allocate(const std::vector<uint8_t> &in_descriptor, int32_t in_count,
+                                              AllocationResult *out_result)
 {
-	buffer_descriptor_t buffer_descriptor;
+        buffer_descriptor_t buffer_descriptor;
 	hidl_vec<uint8_t> hidl_descriptor(in_descriptor);
 	if (!::arm::mapper::common::grallocDecodeBufferDescriptor(hidl_descriptor, buffer_descriptor))
 	{
@@ -73,4 +55,18 @@ ndk::ScopedAStatus allocator::allocate(const std::vector<uint8_t> &in_descriptor
 	return ndk::ScopedAStatus::ok();
 }
 
-} // namespace aidl::android::hardware::graphics::allocator::impl::arm
+} // namespace arm::allocator::aidl
+
+
+static arm::allocator::aidl::IArmAllocator* s_allocator = NULL;
+
+extern "C" arm::allocator::aidl::IArmAllocator *get_arm_aidl_allocator()
+{
+        if ( NULL == s_allocator )
+        {
+                s_allocator = new arm::allocator::aidl::MidgardAllocator();
+        }
+
+        return s_allocator;
+}
+
