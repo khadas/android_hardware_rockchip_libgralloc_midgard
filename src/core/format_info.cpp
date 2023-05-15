@@ -844,8 +844,6 @@ void get_format_dataspace(uint32_t base_format,
                           android_dataspace_t *dataspace,
                           mali_gralloc_yuv_info *yuv_info)
 {
-	uint64_t color_space = HAL_DATASPACE_STANDARD_UNSPECIFIED;
-	uint64_t range = HAL_DATASPACE_RANGE_UNSPECIFIED;
 	*dataspace = HAL_DATASPACE_UNKNOWN;
 	*yuv_info = MALI_YUV_NO_INFO;
 
@@ -864,8 +862,8 @@ void get_format_dataspace(uint32_t base_format,
 	if (formats[format_idx].is_yuv)
 	{
 		/* Default YUV dataspace. */
-		color_space = HAL_DATASPACE_STANDARD_BT709;
-		range = HAL_DATASPACE_RANGE_LIMITED;
+		uint64_t color_space = HAL_DATASPACE_STANDARD_BT709;
+		uint64_t range = HAL_DATASPACE_RANGE_LIMITED;
 
 		/* 10-bit YUV is assumed to be wide BT2020.
 		 */

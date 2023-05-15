@@ -19,6 +19,8 @@
 #ifndef FORMAT_INFO_H_
 #define FORMAT_INFO_H_
 
+#include <numeric>
+
 #include "mali_gralloc_buffer.h"
 
 typedef uint8_t format_support_flags;
@@ -71,12 +73,7 @@ typedef struct
 	/* Computes the total number of components in the format. */
 	int total_components() const
 	{
-		int sum = 0;
-		for (auto n: ncmp)
-		{
-			sum += n;
-		}
-		return sum;
+		return std::accumulate(ncmp, ncmp + MAX_PLANES, 0);
 	}
 } format_info_t;
 

@@ -23,7 +23,7 @@ class MidgardAllocator : public IArmAllocator
 {
 public:
 	virtual ndk::ScopedAStatus allocate(const std::vector<uint8_t> &in_descriptor, int32_t in_count,
-					    AllocationResult *out_result);
+					    AllocationResult *out_result) override;
 };
 
 } // namespace arm::allocator::aidl

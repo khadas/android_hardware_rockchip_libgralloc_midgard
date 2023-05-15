@@ -300,13 +300,13 @@ extern "C" {
 #define CHECK_MALLOC(pDest, type, size, retVar, errCode, label) \
 {\
 	unsigned int bug_len = sizeof(type) * (size);\
-	if ( NULL == ( (pDest) = (type*)malloc(bug_len)))\
+	if ( NULL == ( (pDest) = static_cast<type*>(malloc(bug_len))))\
 	{\
-        retVar = errCode;\
-        MY_E("Failed to malloc %u bytes.", bug_len);\
+		retVar = errCode;\
+		MY_E("Failed to malloc %u bytes.", bug_len);\
 		goto label;\
 	}\
-	memset( (void*)(pDest), 0, sizeof(bug_len));\
+	memset( static_cast<void*>(pDest), 0, sizeof(bug_len));\
 }
 
 /**
@@ -397,7 +397,7 @@ inline static void dumpMemory(const void* pStart, uint32_t len)
     char* pBuf = NULL;          /* dump buffer. 用来以文本的形式("0xaa, 0xbb, ...") 表示 一行, 最多 16 字节的 十六进制数. */
     size_t bufLen = 0;    /* *pBuf 的字节长度, 包括末尾的 '\0'. */
 
-    unsigned char* pSource = (unsigned char*)pStart;          /* 单次 sprintf 操作的源地址. */
+    unsigned char* pSource = static_cast<unsigned char*>(const_cast<void* >(pStart) ); /* 单次 sprintf 操作的源地址. */
     char* pTarget = NULL;                                     /* 目标地址. */
 
     size_t i, j;
@@ -415,7 +415,7 @@ inline static void dumpMemory(const void* pStart, uint32_t len)
     }
     
     bufLen = (BYTES_PER_LINE * BUF_SIZE_PER_SRC_BYTE) + 1;  
-    pBuf = (char*)malloc(bufLen); 
+    pBuf = static_cast<char*>(malloc(bufLen) );
     if ( NULL == pBuf )
     {
         MY_E("no enough memory.");
@@ -444,7 +444,6 @@ inline static void dumpMemory(const void* pStart, uint32_t len)
     }
     
     /* 处理最后的 不满的行. */
-    leftBytes = len % BYTES_PER_LINE;
     if ( 0 != leftBytes )
     {
         pTarget = pBuf;
@@ -496,7 +495,7 @@ inline static void dumpMemory(const void* pStart, uint32_t len)
 inline static void dumpMemInHexAsciiToMem(const void* pStart, unsigned int len, char* pBuf) 
 {
     unsigned int i = 0;
-    unsigned char* pSource = (unsigned char*)pStart;
+    unsigned char* pSource = static_cast<unsigned char*>(const_cast<void*>(pStart) );
     char* pTarget = pBuf;       // 特定写入操作的目标地址. 
 
     if ( NULL == pStart || 0 == len || NULL == pBuf )
@@ -535,12 +534,12 @@ inline static void dumpMemoryWithIndents(const void* pStart, unsigned int len, u
     const unsigned int SRC_BYTES_NUM_PER_LINE = 16;     // 输出中每行显示的源字节的个数. 
 
     unsigned int bufLen = SRC_BYTES_NUM_PER_LINE * DUMP_SIZE_PER_SRC_BYTE;
-    char* pBuf = (char*)malloc(bufLen);
+    char* pBuf = static_cast<char*>(malloc(bufLen) );
 
     unsigned int linesNum = 0;        // 输出的行数.
 
     unsigned char* pSrcStartInLine = NULL;      // 当前行输出对应的源字节序列的起始地址. 
-    unsigned int srcBytesNumInLine = 0; // 当前行要输出端的源字节的个数. 
+    unsigned int srcBytesNumInLine; // 当前行要输出端的源字节的个数. 
     
     unsigned int i = 0;
     
@@ -569,13 +568,11 @@ inline static void dumpMemoryWithIndents(const void* pStart, unsigned int len, u
     /*-------------------------------------------------------*/
 
     pBuf[0] = '\0';
-    pSrcStartInLine = (unsigned char*)pStart;
+    pSrcStartInLine = static_cast<unsigned char*>(const_cast<void*>(pStart) );
 
     /* 逐行输出. */
     for ( i = 0; i < linesNum; i++ )
     {
-        srcBytesNumInLine = (len - (i * SRC_BYTES_NUM_PER_LINE) ) % SRC_BYTES_NUM_PER_LINE;
-
         /* 若当前行 "不是" 最后一行(第 (linesNum - 1) 行 , 则... */
         if ( i < (linesNum - 1) )
         {

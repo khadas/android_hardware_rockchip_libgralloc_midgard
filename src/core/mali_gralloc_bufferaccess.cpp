@@ -119,7 +119,7 @@ int validate_lock_input_parameters(const buffer_handle_t buffer, const int l,
 {
 	bool is_registered_process = false;
 	const int lock_pid = getpid();
-	const private_handle_t * const hnd = (private_handle_t *)buffer;
+	const private_handle_t * const hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 
 	if ((l < 0) || (t < 0) || (w < 0) || (h < 0))
 	{
@@ -226,7 +226,7 @@ int mali_gralloc_lock(buffer_handle_t buffer,
 		return status;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 
 	const int32_t format_idx = get_format_index(hnd->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK);
 	if (format_idx == -1)
@@ -242,7 +242,7 @@ int mali_gralloc_lock(buffer_handle_t buffer,
 		{
 			return -EINVAL;
 		}
-		*vaddr = (void *)hnd->base;
+		*vaddr = static_cast<void *>(hnd->base);
 
 		buffer_sync(hnd, get_tx_direction(usage));
 	}
@@ -291,7 +291,7 @@ int mali_gralloc_lock_ycbcr(const buffer_handle_t buffer,
 		return -EINVAL;
 	}
 
-	private_handle_t * const hnd = (private_handle_t *)buffer;
+	private_handle_t * const hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	const uint32_t base_format = hnd->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
 
 	/* Validate input parameters for lock request */
@@ -321,7 +321,7 @@ int mali_gralloc_lock_ycbcr(const buffer_handle_t buffer,
 			return -EINVAL;
 		}
 
-		ycbcr->y = (char *)hnd->base;
+		ycbcr->y = static_cast<char *>(hnd->base);
 		ycbcr->ystride = hnd->plane_info[0].byte_stride;
 
 		switch (base_format)
@@ -338,24 +338,24 @@ int mali_gralloc_lock_ycbcr(const buffer_handle_t buffer,
 		case MALI_GRALLOC_FORMAT_INTERNAL_NV12:
 			/* UV plane */
 			ycbcr->cstride = hnd->plane_info[1].byte_stride;
-			ycbcr->cb = (char *)hnd->base + hnd->plane_info[1].offset;
-			ycbcr->cr = (char *)ycbcr->cb + 1;
+			ycbcr->cb = static_cast<char *>(hnd->base) + hnd->plane_info[1].offset;
+			ycbcr->cr = static_cast<char *>(ycbcr->cb) + 1;
 			ycbcr->chroma_step = 2;
 			break;
 
 		case MALI_GRALLOC_FORMAT_INTERNAL_NV21:
 			/* VU plane */
 			ycbcr->cstride = hnd->plane_info[1].byte_stride;
-			ycbcr->cr = (char *)hnd->base + hnd->plane_info[1].offset;
-			ycbcr->cb = (char *)ycbcr->cr + 1;
+			ycbcr->cr = static_cast<char *>(hnd->base) + hnd->plane_info[1].offset;
+			ycbcr->cb = static_cast<char *>(ycbcr->cr) + 1;
 			ycbcr->chroma_step = 2;
 			break;
 
 		case MALI_GRALLOC_FORMAT_INTERNAL_YV12:
 			/* V plane, U plane */
 			ycbcr->cstride = hnd->plane_info[1].byte_stride;
-			ycbcr->cr = (char *)hnd->base + hnd->plane_info[1].offset;
-			ycbcr->cb = (char *)hnd->base + hnd->plane_info[2].offset;
+			ycbcr->cr = static_cast<char *>(hnd->base) + hnd->plane_info[1].offset;
+			ycbcr->cb = static_cast<char *>(hnd->base) + hnd->plane_info[2].offset;
 			ycbcr->chroma_step = 1;
 			break;
 
@@ -410,7 +410,7 @@ int mali_gralloc_unlock(buffer_handle_t buffer)
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	buffer_sync(hnd, TX_NONE);
 
 	return 0;
@@ -435,7 +435,7 @@ int mali_gralloc_get_num_flex_planes(const buffer_handle_t buffer,
 	return legacy::mali_gralloc_get_num_flex_planes(buffer, num_planes);
 #endif
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	const uint32_t base_format = hnd->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
 
 	if ((hnd->alloc_format & MALI_GRALLOC_INTFMT_EXT_MASK) != 0)
@@ -528,7 +528,7 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 	return legacy::mali_gralloc_lock_flex(buffer, usage, l, t, w, h, flex_layout);
 #endif
 
-	private_handle_t * const hnd = (private_handle_t *)buffer;
+	private_handle_t * const hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	const uint32_t base_format = hnd->alloc_format & MALI_GRALLOC_INTFMT_FMT_MASK;
 
 	/* Validate input parameters for lock request */
@@ -556,14 +556,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 	{
 	case MALI_GRALLOC_FORMAT_INTERNAL_Y8:
 		flex_layout->format = FLEX_FORMAT_Y;
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 1,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
 		break;
 
 	case MALI_GRALLOC_FORMAT_INTERNAL_Y16:
 		flex_layout->format = FLEX_FORMAT_Y;
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 16, 16, 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 16, 16, 2,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
 		break;
@@ -572,14 +572,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* Y:UV 4:2:0 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 1,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cb, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset + 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset + 1,
 		                      FLEX_COMPONENT_Cr, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[2]);
@@ -591,14 +591,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 1,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset + 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset + 1,
 		                      FLEX_COMPONENT_Cb, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cr, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[2]);
@@ -610,14 +610,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 1,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[2].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[2].offset,
 		                      FLEX_COMPONENT_Cb, 8, 8, 1,
 		                      hnd->plane_info[2].byte_stride, 2, 2,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cr, 8, 8, 1,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[2]);
@@ -627,14 +627,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* Y:UV 4:2:0 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 16, 10, 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 16, 10, 2,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cb, 16, 10, 4,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset + 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset + 2,
 		                      FLEX_COMPONENT_Cr, 16, 10, 4,
 		                      hnd->plane_info[1].byte_stride, 2, 2,
 		                      &flex_layout->planes[2]);
@@ -644,14 +644,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* Y:UV 4:2:2 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 16, 10, 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 16, 10, 2,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cb, 16, 10, 4,
 		                      hnd->plane_info[1].byte_stride, 2, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset + 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset + 2,
 		                      FLEX_COMPONENT_Cr, 16, 10, 4,
 		                      hnd->plane_info[1].byte_stride, 2, 1,
 		                      &flex_layout->planes[2]);
@@ -661,13 +661,13 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* YUYV 4:2:2 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 2,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 2,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 1, FLEX_COMPONENT_Cb, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 1, FLEX_COMPONENT_Cb, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 2, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 3, FLEX_COMPONENT_Cr, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 3, FLEX_COMPONENT_Cr, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 2, 1,
 		                      &flex_layout->planes[2]);
 
@@ -677,14 +677,14 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* Y:UV 4:2:2 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 8, 8, 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 8, 8, 1,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset,
 		                      FLEX_COMPONENT_Cb, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + hnd->plane_info[1].offset + 1,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + hnd->plane_info[1].offset + 1,
 		                      FLEX_COMPONENT_Cr, 8, 8, 2,
 		                      hnd->plane_info[1].byte_stride, 2, 1,
 		                      &flex_layout->planes[2]);
@@ -695,13 +695,13 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* YUYV 4:2:2 */
 		flex_layout->format = FLEX_FORMAT_YCbCr;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_Y, 16, 10, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_Y, 16, 10, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_Cb, 16, 10, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_Cb, 16, 10, 8,
 		                      hnd->plane_info[0].byte_stride, 2, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 6, FLEX_COMPONENT_Cr, 16, 10, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 6, FLEX_COMPONENT_Cr, 16, 10, 8,
 		                      hnd->plane_info[0].byte_stride, 2, 1,
 		                      &flex_layout->planes[2]);
 
@@ -711,16 +711,16 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 	case MALI_GRALLOC_FORMAT_INTERNAL_RGBA_16161616:
 		flex_layout->format = FLEX_FORMAT_RGBA;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_R, 16, 16, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_R, 16, 16, 8,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_G, 16, 16, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_G, 16, 16, 8,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 4, FLEX_COMPONENT_B, 16, 16, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 4, FLEX_COMPONENT_B, 16, 16, 8,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[2]);
-		set_flex_plane_params((uint8_t *)hnd->base + 6, FLEX_COMPONENT_A, 16, 16, 8,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 6, FLEX_COMPONENT_A, 16, 16, 8,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[3]);
 		break;
@@ -729,16 +729,16 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* 32-bit format that has 8-bit R, G, B, and A components, in that order */
 		flex_layout->format = FLEX_FORMAT_RGBA;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_R, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_R, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 1, FLEX_COMPONENT_G, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 1, FLEX_COMPONENT_G, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_B, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_B, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[2]);
-		set_flex_plane_params((uint8_t *)hnd->base + 3, FLEX_COMPONENT_A, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 3, FLEX_COMPONENT_A, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[3]);
 		break;
@@ -747,13 +747,13 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* 32-bit format that has 8-bit R, G, B, and unused components, in that order */
 		flex_layout->format = FLEX_FORMAT_RGB;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_R, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_R, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 1, FLEX_COMPONENT_G, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 1, FLEX_COMPONENT_G, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_B, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_B, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[2]);
 		break;
@@ -762,13 +762,13 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		/* 24-bit format that has 8-bit R, G, and B components, in that order */
 		flex_layout->format = FLEX_FORMAT_RGB;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_R, 8, 8, 3,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_R, 8, 8, 3,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 1, FLEX_COMPONENT_G, 8, 8, 3,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 1, FLEX_COMPONENT_G, 8, 8, 3,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_B, 8, 8, 3,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_B, 8, 8, 3,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[2]);
 		break;
@@ -780,16 +780,16 @@ int mali_gralloc_lock_flex(const buffer_handle_t buffer, const uint64_t usage, c
 		 */
 		flex_layout->format = FLEX_FORMAT_RGBA;
 
-		set_flex_plane_params((uint8_t *)hnd->base, FLEX_COMPONENT_B, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base), FLEX_COMPONENT_B, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[2]);
-		set_flex_plane_params((uint8_t *)hnd->base + 1, FLEX_COMPONENT_G, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 1, FLEX_COMPONENT_G, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[1]);
-		set_flex_plane_params((uint8_t *)hnd->base + 2, FLEX_COMPONENT_R, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 2, FLEX_COMPONENT_R, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[0]);
-		set_flex_plane_params((uint8_t *)hnd->base + 3, FLEX_COMPONENT_A, 8, 8, 4,
+		set_flex_plane_params(static_cast<uint8_t *>(hnd->base) + 3, FLEX_COMPONENT_A, 8, 8, 4,
 		                      hnd->plane_info[0].byte_stride, 1, 1,
 		                      &flex_layout->planes[3]);
 		break;

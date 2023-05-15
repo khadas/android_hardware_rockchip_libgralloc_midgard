@@ -72,7 +72,7 @@ static std::vector<std::vector<PlaneLayoutComponent>> plane_layout_components_fr
 	};
 
 	/* clang-format off */
-	static table_entry table[] = {
+	const static table_entry table[] = {
 		/* 16 bit RGB(A) */
 		{
 			.drm_fourcc = DRM_FORMAT_RGB565,

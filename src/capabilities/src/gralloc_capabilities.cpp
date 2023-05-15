@@ -67,7 +67,7 @@ static bool get_block_capabilities(const char *name, mali_gralloc_format_caps *b
 
 		if (sym)
 		{
-			memcpy((void *)block_caps, sym, sizeof(mali_gralloc_format_caps));
+			memcpy(static_cast<void *>(block_caps), sym, sizeof(mali_gralloc_format_caps));
 			rval = true;
 		}
 		else

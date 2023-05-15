@@ -40,13 +40,13 @@ struct aligned_optional
 
 	aligned_optional() = default;
 
-	aligned_optional(T initial_value)
+	explicit aligned_optional(T initial_value)
 	    : item_state(state::occupied)
 	    , item(initial_value)
 	{
 	}
 
-	aligned_optional(std::optional<T> std_optional)
+	explicit aligned_optional(std::optional<T> std_optional)
 	    : item_state(std_optional ? state::occupied : state::vacant)
 	{
 		if (std_optional)
@@ -61,6 +61,11 @@ struct aligned_optional
 		{
 		case state::vacant: return std::nullopt;
 		case state::occupied: return std::make_optional(item);
+		default:
+			{
+				MALI_GRALLOC_LOGE("invalid 'item_state': %d", item_state);
+				return std::nullopt;
+			}
 		}
 	}
 };
@@ -99,7 +104,7 @@ struct shared_metadata
 
 	shared_metadata() = default;
 
-	shared_metadata(std::string_view in_name)
+	explicit shared_metadata(std::string_view in_name)
 	{
 		name.size = std::min(name.capacity(), static_cast<uint32_t>(in_name.size()));
 		std::memcpy(name.data(), in_name.data(), name.size);

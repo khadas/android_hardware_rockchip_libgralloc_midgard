@@ -131,7 +131,6 @@ android::base::expected<std::vector<unique_private_handle>, android::status_t> a
 		else if (stride != tmpStride)
 		{
 			/* Stride must be the same for all allocations */
-			stride = 0;
 			return android::base::unexpected{ android::BAD_VALUE };
 		}
 

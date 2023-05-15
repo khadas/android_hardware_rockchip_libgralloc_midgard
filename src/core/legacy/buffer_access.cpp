@@ -108,7 +108,7 @@ int mali_gralloc_lock(buffer_handle_t buffer, uint64_t usage, int l, int t, int 
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 
 	if (hnd->req_format == HAL_PIXEL_FORMAT_YCbCr_420_888)
 	{
@@ -118,7 +118,7 @@ int mali_gralloc_lock(buffer_handle_t buffer, uint64_t usage, int l, int t, int 
 
 	if (usage & (GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK))
 	{
-		*vaddr = (void *)hnd->base;
+		*vaddr = static_cast<void *>(hnd->base);
 
 		buffer_sync(hnd, get_tx_direction(usage));
 	}
@@ -145,12 +145,12 @@ int mali_gralloc_lock_ycbcr(buffer_handle_t buffer, uint64_t usage, int l, int t
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 
 	if (usage & (GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK) &&
 	    !(hnd->internal_format & MALI_GRALLOC_INTFMT_EXT_MASK))
 	{
-		char *base = (char *)hnd->base;
+		char *base = static_cast<char *>(hnd->base);
 		int y_stride = hnd->byte_stride;
 		/* Ensure height is aligned for subsampled chroma before calculating buffer parameters */
 		int adjusted_height = GRALLOC_ALIGN(hnd->height, 2);
@@ -226,7 +226,7 @@ int mali_gralloc_unlock(buffer_handle_t buffer)
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	buffer_sync(hnd, TX_NONE);
 
 	return 0;
@@ -245,7 +245,7 @@ int mali_gralloc_get_num_flex_planes(buffer_handle_t buffer, uint32_t *num_plane
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 	uint64_t base_format = hnd->internal_format & MALI_GRALLOC_INTFMT_FMT_MASK;
 
 	switch (base_format)
@@ -283,12 +283,12 @@ int mali_gralloc_lock_flex(buffer_handle_t buffer, uint64_t usage, int l, int t,
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)buffer;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(buffer) );
 
 	if (usage & (GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK) &&
 	    !(hnd->internal_format & MALI_GRALLOC_INTFMT_EXT_MASK))
 	{
-		uint8_t *base = (uint8_t *)hnd->base;
+		uint8_t *base = static_cast<uint8_t *>(hnd->base);
 		int y_stride = hnd->byte_stride;
 		/* Ensure height is aligned for subsampled chroma before calculating buffer parameters */
 		int adjusted_height = GRALLOC_ALIGN(hnd->height, 2);

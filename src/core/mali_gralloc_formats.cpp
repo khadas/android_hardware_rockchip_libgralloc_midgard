@@ -362,7 +362,6 @@ void mali_gralloc_adjust_dimensions(const uint64_t internal_format,
 	get_afbc_alignment(*internal_width, *internal_height, type,
 	                   internal_width, internal_height);
 
-out:
 	MALI_GRALLOC_LOGV("%s: internal_format=0x%" PRIx64 " usage=0x%" PRIx64
 	      " width=%u, height=%u, internal_width=%d, internal_height=%d",
 	      __FUNCTION__, internal_format, usage, width, height, *internal_width, *internal_height);
@@ -453,7 +452,6 @@ void mali_gralloc_adjust_dimensions(const uint64_t alloc_format,
 		}
 	}
 
-out:
 	MALI_GRALLOC_LOGV("%s: alloc_format=0x%" PRIx64 " usage=0x%" PRIx64
 	      " alloc_width=%u, alloc_height=%u",
 	      __FUNCTION__, alloc_format, usage, *width, *height);
@@ -921,7 +919,7 @@ static uint64_t get_afbc_format(const uint32_t base_format,
  *
  * @return none.
  */
-static void get_active_caps(const format_info_t format,
+static void get_active_caps(const format_info_t& format,
                             const uint16_t producers,
                             const uint16_t consumers,
                             uint64_t * const producer_active_caps,
@@ -1062,7 +1060,7 @@ bool get_supported_format(const uint32_t base_format,
 		 * must always be supported in case of fallback from DPU.
 		 */
 		const uint16_t consumers_nodpu = consumers & ~MALI_GRALLOC_CONSUMER_DPU;
-		uint64_t consumer_nodpu_caps = consumer_active_caps;
+		uint64_t consumer_nodpu_caps;
 
 		/* Set consumer caps to GPU-only (assume superset of DPU). */
 		consumer_nodpu_caps = get_consumer_caps(consumers_nodpu);
@@ -1967,7 +1965,6 @@ uint64_t mali_gralloc_select_format(const int width,
 
 		uint64_t producer_active_caps = producer_caps;
 		uint64_t consumer_active_caps = consumer_caps;
-		uint64_t consumer_caps_mask;
 
 		get_active_caps(formats[req_fmt_idx],
 		                producers, consumers,

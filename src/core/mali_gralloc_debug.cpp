@@ -74,7 +74,6 @@ void mali_gralloc_dump_buffers(android::String8 &dumpStrings, uint32_t *outSize)
 	dumpStrings.clear();
 	mali_gralloc_dump_string(dumpStrings,
 	                         "-------------------------Start to dump Gralloc buffers info------------------------\n");
-	private_handle_t *hnd;
 	size_t num;
 
 	mali_gralloc_dump_string(dumpStrings, "    handle  | width | height | stride |   req format   |internal "
@@ -86,7 +85,7 @@ void mali_gralloc_dump_buffers(android::String8 &dumpStrings, uint32_t *outSize)
 
 	for (num = 0; num < dump_buffers.size(); num++)
 	{
-		hnd = dump_buffers[num];
+		private_handle_t *hnd = dump_buffers[num];
 		mali_gralloc_dump_string(dumpStrings, " %08" PRIxPTR " | %5d |  %5d |  %5d |    %08x    |    %09" PRIx64
 		                                      "  |   %09" PRIx64 "  |   %09" PRIx64 "  |  %08x | %4d |\n",
 		                         hnd, hnd->width, hnd->height, hnd->stride, hnd->req_format, hnd->internal_format,

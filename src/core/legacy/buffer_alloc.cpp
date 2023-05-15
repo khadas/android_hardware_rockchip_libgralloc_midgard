@@ -147,7 +147,6 @@ static void get_rgb_stride_and_size(int width, int height, int pixel_size, bool 
 	if (type.primary_type != UNCOMPRESSED)
 	{
 		int nblocks;
-		int body_alignment;
 
 		stride = width * pixel_size;
 		stride = GRALLOC_ALIGN(stride, 64);
@@ -212,7 +211,6 @@ static bool get_afbc_yuv420_8bit_stride_and_size(int width, int height, int *pix
                                                  size_t *size, alloc_type_t type)
 {
 	int yuv420_afbc_luma_stride, yuv420_afbc_chroma_stride;
-	int nblocks;
 
 	if (type.primary_type == UNCOMPRESSED)
 	{
@@ -351,7 +349,6 @@ static bool get_afbc_yuv422_8bit_stride_and_size(int width, int height, int *pix
                                                  size_t *size, alloc_type_t type)
 {
 	int yuv422_afbc_luma_stride;
-	int nblocks;
 
 	if (type.primary_type == UNCOMPRESSED)
 	{
@@ -600,7 +597,6 @@ static bool get_yuv420_10bit_afbc_stride_and_size(int width, int height, int *pi
                                                   size_t *size, alloc_type_t type)
 {
 	int yuv420_afbc_byte_stride, yuv420_afbc_pixel_stride;
-	int nblocks;
 
 	if (width & 3)
 	{
@@ -666,7 +662,6 @@ static bool get_yuv422_10bit_afbc_stride_and_size(int width, int height, int *pi
                                                   size_t *size, alloc_type_t type)
 {
 	int yuv422_afbc_byte_stride, yuv422_afbc_pixel_stride;
-	int nblocks;
 
 	if (width & 3)
 	{

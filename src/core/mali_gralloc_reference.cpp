@@ -36,7 +36,7 @@ int mali_gralloc_reference_retain(buffer_handle_t handle)
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)handle;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(handle) );
 	pthread_mutex_lock(&s_map_lock);
 
 	if (hnd->allocating_pid == getpid() || hnd->remote_pid == getpid())
@@ -78,7 +78,7 @@ int mali_gralloc_reference_release(buffer_handle_t handle, bool canFree)
 		return -EINVAL;
 	}
 
-	private_handle_t *hnd = (private_handle_t *)handle;
+	private_handle_t *hnd = static_cast<private_handle_t *>(const_cast<native_handle_t *>(handle) );
 	pthread_mutex_lock(&s_map_lock);
 
 	if (hnd->ref_count == 0)

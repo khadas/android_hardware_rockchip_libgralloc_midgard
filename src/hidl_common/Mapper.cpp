@@ -506,31 +506,6 @@ static Error lockBuffer(buffer_handle_t bufferHandle,
 	return Error::NONE;
 }
 
-void lockYCbCr(void* buffer, uint64_t cpuUsage,
-               const IMapper::Rect& accessRegion,
-               const hidl_handle& acquireFence,
-               IMapper::lockYCbCr_cb hidl_cb)
-{
-	YCbCrLayout layout = {};
-
-	buffer_handle_t bufferHandle = gRegisteredHandles->get(buffer);
-	if (!bufferHandle)
-	{
-		MALI_GRALLOC_LOGE("Buffer to lock(YCbCr): %p has not been registered with Gralloc", buffer);
-		hidl_cb(Error::BAD_BUFFER, layout);
-		return;
-	}
-
-	int fenceFd;
-	if (!getFenceFd(acquireFence, &fenceFd))
-	{
-		hidl_cb(Error::BAD_VALUE, layout);
-		return;
-	}
-
-	const Error error = lockBuffer(bufferHandle, cpuUsage, accessRegion, fenceFd, &layout);
-	hidl_cb(error, layout);
-}
 #endif /* HIDL_MAPPER_VERSION_SCALED < 400 */
 
 #if HIDL_MAPPER_VERSION_SCALED >= 210
