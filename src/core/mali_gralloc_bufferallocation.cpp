@@ -810,14 +810,23 @@ int mali_gralloc_derive_format_and_size(buffer_descriptor_t * const bufDescripto
 	                                                         bufDescriptor->width * bufDescriptor->height,
 	                                                         &bufDescriptor->old_internal_format);
 
-	if(((bufDescriptor->alloc_format == 0x30 || bufDescriptor->alloc_format == 0x31 || bufDescriptor->alloc_format == 0x32 ||
-		bufDescriptor->alloc_format == 0x33 || bufDescriptor->alloc_format == 0x34 || bufDescriptor->alloc_format == 0x35) &&
-		(usage == 0x300 || usage == 0x200) && alloc_width <= 100 && alloc_height <= 100) ||
-		(bufDescriptor->alloc_format == 0x100 && (alloc_width == 100 || alloc_width == 4) && (alloc_height == 100 || alloc_height == 4) &&
-		(usage == 0x300 || usage == 0x200)))
+	/*
+	 * On android.hardware.nativehardware.cts
+	 *              glCheckFramebuffer will return GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+	 *              relative func on mali so is gles_surface_pixel_format_is_depth_renderable
+	 * Also, deqp dEQP-VK.api.external.memory.android_hardware_buffer.image_formats *
+	 *              on VkAndroidHardwareBufferFormatPropertiesANDROID
+	 *              TCU_CHECK(formatProperties.format == format) failed
+	 */
+
+	if (bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_DEPTH_16 ||
+	    bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_DEPTH_24 ||
+	    bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_DEPTH_24_STENCIL_8 ||
+	    bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_DEPTH_32F ||
+	    bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_DEPTH_32F_STENCIL_8 ||
+	    bufDescriptor->alloc_format == MALI_GRALLOC_FORMAT_INTERNAL_STENCIL_8)
 	{
-		ALOGE("rk-debug isSupported workaround for cts NativeHardware format = 0x%" PRIx64 " and usage 0x%" PRIx64,
-				bufDescriptor->alloc_format, usage);
+		ALOGE("Workaround: Midgard can not support DEPTH & STENCIL format");
 		return -EINVAL;
 	}
 
