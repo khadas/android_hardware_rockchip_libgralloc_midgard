@@ -160,7 +160,7 @@ static std::vector<std::vector<PlaneLayoutComponent>> plane_layout_components_fr
 			.drm_fourcc = DRM_FORMAT_P210,
 			.components = {
 				{ { Y, 6, 10 } },
-				{ { CB, 6, 10 }, { CB, 22, 10 } }
+				{ { CB, 6, 10 }, { CR, 22, 10 } }
 			}
 		},
 		/* Semi-planar 10 bit YUV 4:2:0 */
@@ -168,7 +168,7 @@ static std::vector<std::vector<PlaneLayoutComponent>> plane_layout_components_fr
 			.drm_fourcc = DRM_FORMAT_P010,
 			.components = {
 				{ { Y, 6, 10 } },
-				{ { CB, 6, 10 }, { CB, 22, 10 } }
+				{ { CB, 6, 10 }, { CR, 22, 10 } }
 			}
 		},
 		/* Planar 8 bit YUV 4:2:0 */
